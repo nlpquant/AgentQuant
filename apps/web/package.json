@@ -8,7 +8,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint . --max-warnings 0",
-    "check-types": "tsc --noEmit"
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "check-types": "tsc --noEmit",
+    "test": "echo 'No tests yet - add Jest or Vitest setup'"
   },
   "dependencies": {
     "next": "^15.5.0",
