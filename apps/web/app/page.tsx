@@ -11,7 +11,12 @@ const ThemeImage = (props: Props) => {
 
   return (
     <>
-      <Image {...rest} src={srcLight} className="imgLight" alt={rest.alt || ""} />
+      <Image
+        {...rest}
+        src={srcLight}
+        className="imgLight"
+        alt={rest.alt || ""}
+      />
       <Image {...rest} src={srcDark} className="imgDark" alt={rest.alt || ""} />
     </>
   );
@@ -62,9 +67,7 @@ export default function Home() {
             Read our docs
           </a>
         </div>
-        <button className={styles.secondary}>
-          Open alert
-        </button>
+        <button className={styles.secondary}>Open alert</button>
       </main>
       <footer className={styles.footer}>
         <a
