@@ -1,0 +1,23 @@
+[project]
+name = "agent-quant-api"
+version = "0.1.0"
+description = "FastAPI backend for Agent Quant MVP"
+dependencies = [
+    "fastapi>=0.104.0",
+    "uvicorn[standard]>=0.24.0",
+    "yfinance>=0.2.18",
+    "backtrader>=1.9.78",
+    "pandas>=2.1.0",
+    "numpy>=1.24.0",
+    "python-multipart>=0.0.6"
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.uv]
+dev-dependencies = [
+    "pytest>=7.4.0",
+    "httpx>=0.25.0"
+]
