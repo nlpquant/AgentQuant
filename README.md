@@ -114,6 +114,9 @@ AgentQuant/
 
 ## License
 
-**License: TBD** - Considering AGPL v3 or other strong copyleft license.
+This project uses **mixed licensing**:
 
-This project is planned as part of an open source initiative and will adopt a strict open source license to ensure code and derivatives remain open source.
+- **Backend API** (`apps/api/`) - **AGPL-3.0** - Ensures trading algorithms remain open source
+- **Frontend Web** (`apps/web/`) - **MIT License** - Allows flexible UI integration
+
+See individual LICENSE files in each app directory for full terms.

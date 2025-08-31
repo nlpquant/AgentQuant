@@ -1,0 +1,15 @@
+AgentQuant Mixed License
+
+This project contains components under different licenses:
+
+1. Backend API (apps/api/) - Licensed under AGPL-3.0
+   See: apps/api/LICENSE
+
+2. Frontend Web (apps/web/) - Licensed under MIT License
+   See: apps/web/LICENSE
+
+When using or distributing this software, you must comply with the
+license terms for each respective component.
+
+For questions about licensing, please refer to the individual LICENSE
+files in each application directory.
