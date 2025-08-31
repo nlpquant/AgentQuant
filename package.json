@@ -8,7 +8,8 @@
     "lint:fix": "turbo run lint:fix",
     "format": "turbo run format",
     "check-types": "turbo run check-types",
-    "test": "turbo run test"
+    "test": "turbo run test",
+    "postinstall": "cd apps/api && uv sync"
   },
   "devDependencies": {
     "prettier": "^3.6.2",
