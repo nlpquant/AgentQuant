@@ -1,0 +1,41 @@
+# <type>(<scope>): <subject>
+#
+# <body>
+#
+# <footer>
+
+# --- COMMIT END ---
+# Type can be:
+#   feat     (new feature)
+#   fix      (bug fix)
+#   refactor (refactoring code)
+#   style    (formatting, missing semicolons, etc; no code change)
+#   doc      (changes to documentation)
+#   test     (adding or refactoring tests; no production code change)
+#   chore    (updating build tasks, package manager configs, etc; no production code change)
+#   perf     (performance improvement)
+#   ci       (CI/CD related changes)
+#
+# Scope is optional and can be:
+#   api, web, core, config, deps, etc.
+#
+# Subject line rules:
+#   - Use imperative mood ("add" not "added" or "adds")
+#   - Don't capitalize first letter
+#   - No period at the end
+#   - Keep under 50 characters
+#
+# Body (optional):
+#   - Use imperative mood
+#   - Wrap at 72 characters
+#   - Explain what and why, not how
+#
+# Footer (optional):
+#   - Reference issues: "Closes #123"
+#   - Breaking changes: "BREAKING CHANGE: ..."
+#
+# Examples:
+#   feat(api): add user authentication endpoint
+#   fix(web): resolve navbar alignment on mobile
+#   refactor(core): extract common validation logic
+#   chore(deps): update fastapi to v0.104.0
