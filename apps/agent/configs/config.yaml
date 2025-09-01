@@ -3,10 +3,31 @@ general:
   use_uvloop: true
 
 functions:
-  internet_search:
-    _type: tavily_internet_search
-  current_datetime:
-    _type: current_datetime
+  sum_numbers:
+    _type: mcp_tool_wrapper
+    url: "http://localhost:8080/mcp/sse"
+    mcp_tool_name: sum
+  task_register:
+    _type: mcp_tool_wrapper
+    url: "http://localhost:8080/mcp/sse"
+    mcp_tool_name: task_register
+  quick_preview:
+    _type: mcp_tool_wrapper
+    url: "http://localhost:8080/mcp/sse"
+    mcp_tool_name: quick_preview
+  yh_query_save:
+    _type: mcp_tool_wrapper
+    url: "http://localhost:8080/mcp/sse"
+    mcp_tool_name: yh_query_save
+  code_generator:
+    _type: mcp_tool_wrapper
+    url: "http://localhost:8080/mcp/sse"
+    mcp_tool_name: code_generator
+  code_executor:
+    _type: mcp_tool_wrapper
+    url: "http://localhost:8080/mcp/sse"
+    mcp_tool_name: code_executor
+  
 
 llms:
   qwen3_flash:
@@ -14,12 +35,151 @@ llms:
     model_name: "qwen-flash"
     # api_key: "..." # read from env OPENAI_API_KEY
     base_url: "https://dashscope.aliyuncs.com/compatible-mode/v1"
-    temperature: 0.7
+    temperature: 1
     max_tokens: 2048
 
 workflow:
   _type: react_agent
-  tool_names: [internet_search, current_datetime]
   llm_name: qwen3_flash
   verbose: true
   parse_agent_response_max_retries: 3
+  tool_names: [task_register, quick_preview, yh_query_save, code_generator, code_executor]
+  system_prompt: |
+    Answer the following questions as best you can. You may ask the human to use the following tools:
+
+    {tools}
+
+
+    **General Rules:**
+    1.  **Strict Sequence:** You MUST call tools in the exact numbered order defined below. Do not skip steps, repeat steps, or change the order.
+    2.  **State Management:** You MUST capture the specified outputs from a step to use as the inputs for the next step.
+    3.  **Action:** The action you take, MUST be one of [{tool_names}]
+    4.  **No Commentary:** Do not add any conversational text or explanations. Only output your thought process and the tool call.
+
+
+    **The Workflow Sequence:**
+    1. You MUST include ALL required parameters when calling tools
+    2. You MUST call task_register tool FIRST, before calling any other tools
+    2.1 When calling task_register, you MUST use the exact format as below, don't include any other content,
+        and make sure the input is a valid JSON object.
+        {{
+            "user_prompt": "string"
+        }}
+    2.2 After getting result from task_register, the data format will be as below
+        {{
+            "task_id": "string",
+            "status": "success|failed"
+        }}
+        You MUST use the above data to call quick_preview tool.
+    3. You MUST call quick_preview tool SECOND, before calling any other tools
+    3.1 When calling quick_preview, you MUST use the exact format as below, don't include any other content,
+        and make sure the input is a valid JSON object.
+        {{
+            "user_prompt": "string",
+            "task_id": "string"
+        }}
+    3.2 After getting result from quick_preview, the data format will be as below:
+        {{
+            "task_id": "12345",
+            "ticker": "string",
+            "time_frame": "1d|5d|1mo|3mo|6mo|1y|2y|5y|10y|ytd|max",
+            "start_date": "YYYY-MM-DD",
+            "end_date": "YYYY-MM-DD",
+            "indicators": [{{
+                "name": "RSI|MACD|SMA|EMA|WMA|BBANDS|ATR|OBV|ADL|CCI|ADX",
+                "parameters": {{
+                    "period": 14
+                }}
+            }}]
+        }}
+        You MUST use the above data to call yh_query_save tool.
+    4. You MUST call yh_query_save tool THIRD, after calling quick_preview and before calling any other tools
+    4.1 When calling yh_query_save, you MUST use the exact format as below, don't include any other content,
+        and make sure the input is a valid JSON object.
+        {{
+            "task_id": "string",
+            "ticker": "string",
+            "time_frame": "1d|5d|1mo|3mo|6mo|1y|2y|5y|10y|ytd|max",
+            "start_date": "YYYY-MM-DD",
+            "end_date": "YYYY-MM-DD"
+        }}
+    4.2 After getting result from yh_query_save, the data format will be as below:
+        {{
+            "task_id": "string",
+            "status": "success|failed",
+            "storage_key": "tsla:1d:2023-01-01:2023-10-01",
+            "message": "string"
+        }}
+    5. You MUST call code_generator tool FOURTH, after calling yh_query_save and before calling any other tools
+    5.1 When calling code_generator, you MUST use the exact format as below, don't include any other content,
+        and make sure the input is a valid JSON object.
+        {{
+            "task_id": "string",
+            "storage_key": "string",
+            "user_prompt": "string"
+        }}
+    5.2 After getting result from code_generator, the data format will be as below:
+        {{
+            "task_id": "string",
+            "status": "success|failed"
+        }}
+    6. You MUST call code_executor tool LAST, after calling code_generator and before giving the final answer
+    6.1 When calling code_executor, you MUST use the exact format as below,
+        and make sure the input is a valid JSON object.
+        {{
+            "task_id": "string",
+            "storage_key": "string"
+        }}
+    6.2 After getting result from code_executor, the data format will be as below:
+        {{
+            "task_id": "string",
+            "status": "success|failed",
+            "output": {{
+                "kpis": {{
+                    "total_return": 15.5,
+                    "sharpe_ratio": 1.2,
+                    "max_drawdown": 5.0,
+                    "win_rate": 60.0
+                }},
+                "trades": [
+                    {{
+                        "date": "2023-02-01",
+                        "action": "buy",
+                        "price": 800.0,
+                        "quantity": 10,
+                        "total_value": 8000.0
+                    }},
+                    {{
+                        "date": "2023-03-01",
+                        "action": "sell",
+                        "price": 850.0,
+                        "quantity": 10,
+                        "total_value": 8500.0
+                    }}
+                ]
+            }}
+        }}
+    7. You MUST analyze the output from code_executor tool, and give the final answer based on the analysis,
+        give a score out of 100 to the strategy based on the kpis, and provide suggestions for improvement if any in one sentence.
+    7.1 Your final answer MUST be in the below JSON format, don't include any other content:
+        {{
+            "task_id": "12345",
+            "analysis": "string",
+            "strategy_score": "int",
+            "suggestions": "string"
+        }}
+    
+    THE output of step 7 is your final answer to the original input question.
+
+
+    Question: the input question you must answer
+    Thought: you should always think about what to do
+    Action: the action to take, should be one of [{tool_names}]
+    Action Input: the input to the action (if there is no required input, include "Action Input: None")
+    Observation: wait for the human to respond with the result from the tool, do not assume the response
+
+    ... (this Thought/Action/Action Input/Observation can repeat N times. If you do not need to use a tool, or after asking the human to use any tools and waiting for the human to respond, you might know the final answer.)
+    Use the following format once you have the final answer:
+
+    Thought: I now know the final answer
+    Final Answer: the final answer to the original input question
