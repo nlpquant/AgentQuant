@@ -56,7 +56,7 @@ def create_sse_server(mcp: FastMCP):
     # "/sse/" becomes "/mcp/sse/" when mounted.
     # "/messages/" becomes "/mcp/messages/" when mounted.
     routes = [
-        Route("/sse/", endpoint=handle_sse),
+        Route("/sse", endpoint=handle_sse),
         Mount("/messages/", app=transport.handle_post_message),
     ]
 
