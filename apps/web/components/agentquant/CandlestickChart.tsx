@@ -127,7 +127,7 @@ export function CandlestickChart({
     }
 
     return dataWithMA;
-  }, [showSignals]);
+  }, [showSignals, isRefinedStrategy]);
 
   const CustomCandlestick = (props: any) => {
     const { payload, x, y, width, height } = props;

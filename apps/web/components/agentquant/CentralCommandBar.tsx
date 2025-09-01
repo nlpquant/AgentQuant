@@ -21,7 +21,7 @@ export function CentralCommandBar({
     if (currentQuery && currentQuery !== query) {
       setQuery(currentQuery);
     }
-  }, [currentQuery]);
+  }, [currentQuery, query]);
 
   const handleAnalyze = async () => {
     if (!query.trim() || isAnalyzing) return;
