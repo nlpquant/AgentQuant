@@ -1,50 +1,250 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+@custom-variant dark (&:is(.dark *));
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+    --font-size: 14px;
+    --font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
+    /* AgentQuant Dark Theme - Primary Colors */
+    --background: #0A0A0A;
+    --foreground: #E5E7EB;
+    --card: #1F2937;
+    --card-foreground: #E5E7EB;
+    --popover: #1F2937;
+    --popover-foreground: #E5E7EB;
+
+    /* AgentQuant Accent Colors */
+    --primary: #3B82F6;
+    --primary-foreground: #FFFFFF;
+    --secondary: #374151;
+    --secondary-foreground: #E5E7EB;
+    --muted: #374151;
+    --muted-foreground: #9CA3AF;
+    --accent: #3B82F6;
+    --accent-foreground: #FFFFFF;
+
+    /* AgentQuant Trading Colors */
+    --success: #10B981;
+    --success-foreground: #FFFFFF;
+    --danger: #EF4444;
+    --danger-foreground: #FFFFFF;
+    --destructive: #EF4444;
+    --destructive-foreground: #FFFFFF;
+
+    /* AgentQuant UI Elements */
+    --border: #374151;
+    --input: #1F2937;
+    --input-background: #1F2937;
+    --switch-background: #374151;
+    --ring: #3B82F6;
+
+    /* Typography Weights */
+    --font-weight-light: 300;
+    --font-weight-normal: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+
+    /* Chart Colors for Financial Data */
+    --chart-1: #3B82F6;
+    --chart-2: #10B981;
+    --chart-3: #EF4444;
+    --chart-4: #F59E0B;
+    --chart-5: #8B5CF6;
+
+    /* Border Radius */
+    --radius: 0.5rem;
+
+    /* Sidebar (for future panels) */
+    --sidebar: #111827;
+    --sidebar-foreground: #E5E7EB;
+    --sidebar-primary: #3B82F6;
+    --sidebar-primary-foreground: #FFFFFF;
+    --sidebar-accent: #1F2937;
+    --sidebar-accent-foreground: #E5E7EB;
+    --sidebar-border: #374151;
+    --sidebar-ring: #3B82F6;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+.dark {
+    /* Dark theme inherits root colors - AgentQuant is dark by default */
+    --background: #0A0A0A;
+    --foreground: #E5E7EB;
+    --card: #1F2937;
+    --card-foreground: #E5E7EB;
+    --popover: #1F2937;
+    --popover-foreground: #E5E7EB;
+    --primary: #3B82F6;
+    --primary-foreground: #FFFFFF;
+    --secondary: #374151;
+    --secondary-foreground: #E5E7EB;
+    --muted: #374151;
+    --muted-foreground: #9CA3AF;
+    --accent: #3B82F6;
+    --accent-foreground: #FFFFFF;
+    --success: #10B981;
+    --success-foreground: #FFFFFF;
+    --danger: #EF4444;
+    --danger-foreground: #FFFFFF;
+    --destructive: #EF4444;
+    --destructive-foreground: #FFFFFF;
+    --border: #374151;
+    --input: #1F2937;
+    --ring: #3B82F6;
+    --chart-1: #3B82F6;
+    --chart-2: #10B981;
+    --chart-3: #EF4444;
+    --chart-4: #F59E0B;
+    --chart-5: #8B5CF6;
+    --sidebar: #111827;
+    --sidebar-foreground: #E5E7EB;
+    --sidebar-primary: #3B82F6;
+    --sidebar-primary-foreground: #FFFFFF;
+    --sidebar-accent: #1F2937;
+    --sidebar-accent-foreground: #E5E7EB;
+    --sidebar-border: #374151;
+    --sidebar-ring: #3B82F6;
 }
 
-html,
-body {
-  max-width: 100vw;
-  overflow-x: hidden;
+@theme inline {
+    --color-background: var(--background);
+    --color-foreground: var(--foreground);
+    --color-card: var(--card);
+    --color-card-foreground: var(--card-foreground);
+    --color-popover: var(--popover);
+    --color-popover-foreground: var(--popover-foreground);
+    --color-primary: var(--primary);
+    --color-primary-foreground: var(--primary-foreground);
+    --color-secondary: var(--secondary);
+    --color-secondary-foreground: var(--secondary-foreground);
+    --color-muted: var(--muted);
+    --color-muted-foreground: var(--muted-foreground);
+    --color-accent: var(--accent);
+    --color-accent-foreground: var(--accent-foreground);
+    --color-success: var(--success);
+    --color-success-foreground: var(--success-foreground);
+    --color-danger: var(--danger);
+    --color-danger-foreground: var(--danger-foreground);
+    --color-destructive: var(--destructive);
+    --color-destructive-foreground: var(--destructive-foreground);
+    --color-border: var(--border);
+    --color-input: var(--input);
+    --color-input-background: var(--input-background);
+    --color-switch-background: var(--switch-background);
+    --color-ring: var(--ring);
+    --color-chart-1: var(--chart-1);
+    --color-chart-2: var(--chart-2);
+    --color-chart-3: var(--chart-3);
+    --color-chart-4: var(--chart-4);
+    --color-chart-5: var(--chart-5);
+    --radius-sm: calc(var(--radius) - 4px);
+    --radius-md: calc(var(--radius) - 2px);
+    --radius-lg: var(--radius);
+    --radius-xl: calc(var(--radius) + 4px);
+    --color-sidebar: var(--sidebar);
+    --color-sidebar-foreground: var(--sidebar-foreground);
+    --color-sidebar-primary: var(--sidebar-primary);
+    --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+    --color-sidebar-accent: var(--sidebar-accent);
+    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+    --color-sidebar-border: var(--sidebar-border);
+    --color-sidebar-ring: var(--sidebar-ring);
 }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
+@layer base {
+    * {
+        @apply border-border outline-ring/50;
+    }
+
+    body {
+        @apply bg-background text-foreground;
+        font-family: var(--font-family);
+    }
 }
 
-* {
-  box-sizing: border-box;
-  padding: 0;
-  margin: 0;
+/**
+ * AgentQuant Typography System - Inter Font Family
+ * Base typography optimized for financial data and modern interfaces
+ */
+@layer base {
+    :where(:not(:has([class*=" text-"]), :not(:has([class^="text-"])))) {
+        h1 {
+            font-size: 2.25rem; /* 36px */
+            font-weight: var(--font-weight-semibold);
+            line-height: 1.2;
+            letter-spacing: -0.025em;
+        }
+
+        h2 {
+            font-size: 1.875rem; /* 30px */
+            font-weight: var(--font-weight-semibold);
+            line-height: 1.3;
+            letter-spacing: -0.025em;
+        }
+
+        h3 {
+            font-size: 1.5rem; /* 24px */
+            font-weight: var(--font-weight-medium);
+            line-height: 1.4;
+        }
+
+        h4 {
+            font-size: 1.125rem; /* 18px */
+            font-weight: var(--font-weight-medium);
+            line-height: 1.4;
+        }
+
+        h5 {
+            font-size: 1rem; /* 16px */
+            font-weight: var(--font-weight-medium);
+            line-height: 1.5;
+        }
+
+        h6 {
+            font-size: 0.875rem; /* 14px */
+            font-weight: var(--font-weight-medium);
+            line-height: 1.5;
+        }
+
+        p {
+            font-size: 1rem; /* 16px */
+            font-weight: var(--font-weight-normal);
+            line-height: 1.6;
+        }
+
+        label {
+            font-size: 0.875rem; /* 14px */
+            font-weight: var(--font-weight-medium);
+            line-height: 1.5;
+        }
+
+        button {
+            font-size: 1rem; /* 16px */
+            font-weight: var(--font-weight-medium);
+            line-height: 1.5;
+        }
+
+        input, textarea {
+            font-size: 1rem; /* 16px */
+            font-weight: var(--font-weight-normal);
+            line-height: 1.5;
+        }
+
+        .data-value {
+            font-weight: var(--font-weight-light);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .kpi-number {
+            font-weight: var(--font-weight-light);
+            font-variant-numeric: tabular-nums;
+            letter-spacing: -0.025em;
+        }
+    }
 }
 
-a {
-  color: inherit;
-  text-decoration: none;
-}
-
-.imgDark {
-  display: none;
-}
-
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
-  }
-
-  .imgLight {
-    display: none;
-  }
-  .imgDark {
-    display: unset;
-  }
+html {
+    font-size: var(--font-size);
+    font-family: var(--font-family);
 }
