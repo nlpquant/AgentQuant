@@ -1,0 +1,25 @@
+
+general:
+  use_uvloop: true
+
+functions:
+  internet_search:
+    _type: tavily_internet_search
+  current_datetime:
+    _type: current_datetime
+
+llms:
+  qwen3_flash:
+    _type: openai
+    model_name: "qwen-flash"
+    # api_key: "..." # read from env OPENAI_API_KEY
+    base_url: "https://dashscope.aliyuncs.com/compatible-mode/v1"
+    temperature: 0.7
+    max_tokens: 2048
+
+workflow:
+  _type: react_agent
+  tool_names: [internet_search, current_datetime]
+  llm_name: qwen3_flash
+  verbose: true
+  parse_agent_response_max_retries: 3

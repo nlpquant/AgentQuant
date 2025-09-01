@@ -1,0 +1,8 @@
+[project]
+name = "agent"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = [
+    "langchain-tavily>=0.2.11",
+    "nvidia-nat[langchain]>=1.2.1",
+]
