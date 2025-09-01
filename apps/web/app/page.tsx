@@ -11,35 +11,47 @@ import { RSIIndicator } from '../components/agentquant/RSIIndicator';
 import { KPICards } from '../components/agentquant/KPICards';
 import { AIAgentMonitor } from '../components/agentquant/AIAgentMonitor';
 
+interface AnalysisState {
+  isAnalyzing: boolean;
+  analysisCompleted: boolean;
+  analysisQuery: string;
+  isIteration: boolean;
+}
+
 export default function Home() {
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [analysisCompleted, setAnalysisCompleted] = useState(false);
-  const [analysisQuery, setAnalysisQuery] = useState('');
-  const [isIteration, setIsIteration] = useState(false);
+  const [state, setState] = useState<AnalysisState>({
+    isAnalyzing: false,
+    analysisCompleted: false,
+    analysisQuery: '',
+    isIteration: false,
+  });
 
   const handleAnalyze = (query: string) => {
-    setAnalysisQuery(query);
-    setIsAnalyzing(true);
-    setAnalysisCompleted(false);
-
-    // Detect if this is an iteration (contains RSI or other refinements)
     const isQueryIteration =
       query.toLowerCase().includes('rsi') ||
       query.toLowerCase().includes('refinement') ||
       query.toLowerCase().includes('below 30') ||
       query.toLowerCase().includes('oversold');
-    setIsIteration(isQueryIteration);
 
-    // For demo purposes, shorter time for iterations to show speed
-    const analysisTime = isQueryIteration ? 4000 : 8000;
+    setState({
+      analysisQuery: query,
+      isAnalyzing: true,
+      analysisCompleted: false,
+      isIteration: isQueryIteration,
+    });
+
+    const analysisTime = isQueryIteration ? 2000 : 3000;
     setTimeout(() => {
-      setIsAnalyzing(false);
-      setAnalysisCompleted(true);
+      setState(prev => ({
+        ...prev,
+        isAnalyzing: false,
+        analysisCompleted: true,
+      }));
     }, analysisTime);
   };
 
   const handleNewAnalysis = (query: string) => {
-    setAnalysisCompleted(false);
+    setState(prev => ({ ...prev, analysisCompleted: false }));
     handleAnalyze(query);
   };
 
@@ -47,6 +59,23 @@ export default function Home() {
     const refinedQuery =
       'Test 50/200 MA crossover strategy on AAPL from 2020-2024 and require the RSI to be below 30 at the time of purchase.';
     handleNewAnalysis(refinedQuery);
+  };
+
+  const resetDemo = () => {
+    setState({
+      isAnalyzing: false,
+      analysisCompleted: false,
+      analysisQuery: '',
+      isIteration: false,
+    });
+  };
+
+  const completeAnalysis = () => {
+    setState(prev => ({
+      ...prev,
+      isAnalyzing: false,
+      analysisCompleted: true,
+    }));
   };
 
   return (
@@ -60,7 +89,7 @@ export default function Home() {
 
           {/* Demo Controls - for testing the UI states */}
           <div className="flex items-center space-x-2">
-            {analysisCompleted && !isIteration && (
+            {state.analysisCompleted && !state.isIteration && (
               <button
                 onClick={handleIterationDemo}
                 className="px-3 py-1 text-xs bg-success hover:bg-success/90 text-success-foreground rounded-md transition-colors"
@@ -68,25 +97,17 @@ export default function Home() {
                 Try RSI Refinement
               </button>
             )}
-            {analysisCompleted && (
+            {state.analysisCompleted && (
               <button
-                onClick={() => {
-                  setAnalysisCompleted(false);
-                  setIsAnalyzing(false);
-                  setIsIteration(false);
-                  setAnalysisQuery('');
-                }}
+                onClick={resetDemo}
                 className="px-3 py-1 text-xs bg-secondary hover:bg-secondary/80 text-secondary-foreground rounded-md transition-colors"
               >
                 Reset Demo
               </button>
             )}
-            {isAnalyzing && (
+            {state.isAnalyzing && (
               <button
-                onClick={() => {
-                  setIsAnalyzing(false);
-                  setAnalysisCompleted(true);
-                }}
+                onClick={completeAnalysis}
                 className="px-3 py-1 text-xs bg-primary hover:bg-primary/90 text-primary-foreground rounded-md transition-colors"
               >
                 Complete Analysis
@@ -101,30 +122,36 @@ export default function Home() {
         <div className="max-w-7xl mx-auto">
           {/* Central Command Section */}
           <div
-            className={`transition-all duration-500 ${isAnalyzing || analysisCompleted ? 'mb-8' : 'flex items-center justify-center min-h-[60vh]'}`}
+            className={`transition-all duration-500 ${
+              state.isAnalyzing || state.analysisCompleted
+                ? 'mb-8'
+                : 'flex items-center justify-center min-h-[60vh]'
+            }`}
           >
             <CentralCommandBar
-              isAnalyzing={isAnalyzing}
-              onAnalyze={analysisCompleted ? handleNewAnalysis : handleAnalyze}
-              currentQuery={analysisQuery}
+              isAnalyzing={state.isAnalyzing}
+              onAnalyze={
+                state.analysisCompleted ? handleNewAnalysis : handleAnalyze
+              }
+              currentQuery={state.analysisQuery}
             />
           </div>
 
           {/* Data Visualization Canvas - Appears during and after analysis */}
-          {(isAnalyzing || analysisCompleted) && (
+          {(state.isAnalyzing || state.analysisCompleted) && (
             <div className="space-y-8">
               {/* Main Chart */}
               <div className="animate-in slide-in-from-bottom-4 duration-500">
                 <CandlestickChart
-                  isLoading={isAnalyzing}
-                  symbol={isIteration ? 'AAPL' : 'TSLA'}
-                  showSignals={analysisCompleted}
-                  isRefinedStrategy={isIteration}
+                  isLoading={state.isAnalyzing}
+                  symbol={state.isIteration ? 'AAPL' : 'TSLA'}
+                  showSignals={state.analysisCompleted}
+                  isRefinedStrategy={state.isIteration}
                 />
               </div>
 
               {/* RSI Indicator Panel - Only show for refined strategy */}
-              {analysisCompleted && isIteration && (
+              {state.analysisCompleted && state.isIteration && (
                 <RSIIndicator
                   isVisible={true}
                   symbol="AAPL"
@@ -133,7 +160,7 @@ export default function Home() {
               )}
 
               {/* KPI Cards - Only show when analysis is completed */}
-              {analysisCompleted && (
+              {state.analysisCompleted && (
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                   {/* Charts column - could add more charts here */}
                   <div className="lg:col-span-2">
@@ -144,7 +171,7 @@ export default function Home() {
                   <div className="lg:col-span-1">
                     <KPICards
                       isVisible={true}
-                      isRefinedStrategy={isIteration}
+                      isRefinedStrategy={state.isIteration}
                     />
                   </div>
                 </div>
@@ -153,7 +180,7 @@ export default function Home() {
           )}
 
           {/* Footer tagline */}
-          {!isAnalyzing && !analysisCompleted && (
+          {!state.isAnalyzing && !state.analysisCompleted && (
             <div className="text-center mt-16 pt-8 border-t border-border/50">
               <p className="text-sm text-muted-foreground">
                 Powered by advanced AI • Real-time market data •
@@ -166,9 +193,9 @@ export default function Home() {
 
       {/* AI Agent Monitor - Appears during and after analysis */}
       <AIAgentMonitor
-        isVisible={isAnalyzing || analysisCompleted}
-        isCompleted={analysisCompleted}
-        isRefinedStrategy={isIteration}
+        isVisible={state.isAnalyzing || state.analysisCompleted}
+        isCompleted={state.analysisCompleted}
+        isRefinedStrategy={state.isIteration}
       />
     </div>
   );
