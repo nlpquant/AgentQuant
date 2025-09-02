@@ -57,6 +57,27 @@ interval_timeframe_map = {
 }
 
 
+def convert_to_ohlcv(data: list) -> list:
+    """Convert raw data to OHLCV format."""
+    ohlcv_data = []
+    for data_point in data:
+        timestamp = data_point[0]
+        dt = datetime.fromtimestamp(timestamp / 1000)
+        date_str = dt.strftime("%Y-%m-%d")
+        ohlcv_data.append(
+            OHLCVData(
+                date=date_str,
+                timestamp=int(timestamp),
+                open=data_point[1],
+                high=data_point[2],
+                low=data_point[3],
+                close=data_point[4],
+                volume=int(data_point[5]),
+            )
+        )
+    return ohlcv_data
+
+
 @mcp.tool()
 async def yh_query_save(
     task_id: str, ticker: str, time_frame: str, start_date: str, end_date: str
@@ -64,26 +85,10 @@ async def yh_query_save(
     """Query Yahoo Finance and save the data, return storage key if succeeded."""
 
     try:
-        ohlcv_data = []
         stroage_key = f"{ticker}:{time_frame}:{start_date}:{end_date}"
         cached_data = await api.state.redis.get(stroage_key)
         if cached_data:
             logger.info(f"Data for {stroage_key} already exists in Redis.")
-            for data_point in list(json.loads(cached_data)):
-                timestamp = data_point[0]
-                dt = datetime.fromtimestamp(timestamp / 1000)
-                date_str = dt.strftime("%Y-%m-%d")
-                ohlcv_data.append(
-                    OHLCVData(
-                        date=date_str,
-                        timestamp=int(timestamp),
-                        open=data_point[1],
-                        high=data_point[2],
-                        low=data_point[3],
-                        close=data_point[4],
-                        volume=int(data_point[5]),
-                    )
-                )
             task_info = await api.state.redis.get(task_id)
             if task_info:
                 task_entry = TaskEntry(**json.loads(task_info))
@@ -122,6 +127,7 @@ async def yh_query_save(
                     "status": "failed",
                     "message": f"No data found for {ticker} between {start_date} and {end_date}",
                 }
+            ohlcv_data = []
             for index, row in data.iterrows():
                 try:
                     # Handle both DatetimeIndex and regular index
@@ -234,3 +240,19 @@ api.mount("/mcp", create_sse_server(mcp))
 @api.get("/")
 def read_root():
     return {"message": "Welcome! The agent is available at the /mcp/sse endpoint."}
+
+
+@api.get("/data/{storage_key}")
+async def get_data(storage_key: str):
+    """Fetch data from Redis by storage key."""
+    try:
+        cached_data = await api.state.redis.get(storage_key)
+        if cached_data:
+            logger.info(f"Data for {storage_key} retrieved from Redis.")
+            return {"data": convert_to_ohlcv(json.loads(cached_data))}
+        else:
+            logger.warning(f"No data found for {storage_key} in Redis.")
+            return {"error": "Data not found"}, 404
+    except Exception as e:
+        logger.error(f"Failed to query Redis: {e}")
+        return {"error": str(e)}, 500
