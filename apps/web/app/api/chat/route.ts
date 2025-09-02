@@ -71,7 +71,9 @@ export async function POST(req: Request) {
                   json.choices[0]?.message?.content ||
                   '';
                 if (content) {
-                  controller.enqueue(`0:${JSON.stringify(content)}\n`);
+                  controller.enqueue(
+                    `data: ${JSON.stringify({ type: 'data-json', data: content })}\n\n`
+                  );
                 }
               } catch (e) {
                 // Ignore parsing errors
