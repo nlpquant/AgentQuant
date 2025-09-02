@@ -1,6 +1,6 @@
 import redis.asyncio as redis
 
-from app.config import settings as global_settings
+from mcp_server.config import settings as global_settings
 
 
 async def init_redis_pool() -> redis.Redis:

@@ -24,4 +24,4 @@ COPY . .
 
 EXPOSE 8080
 
-CMD ["uv", "run", "uvicorn", "app.main:api", "--host", "0.0.0.0", "--port", "8080"]
+CMD ["uv", "run", "uvicorn", "mcp_server.main:api", "--host", "0.0.0.0", "--port", "8080"]

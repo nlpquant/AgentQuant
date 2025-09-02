@@ -3,8 +3,10 @@ name = "mcp-server"
 version = "0.1.0"
 requires-python = ">=3.12"
 dependencies = [
-    "fastapi[standard]>=0.116.1",
-    "mcp>=1.13.1",
-    "redis>=6.4.0",
+    # "fastapi[standard]>=0.116.1",
+    "fastapi[standard]>=0.115.5,<0.116.dev0",
+    "mcp>=1.10.0",
+    "pydantic==2.10.*",
+    "redis>=4.3.4,<4.4.dev0",
     "yfinance>=0.2.65",
 ]

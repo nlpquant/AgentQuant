@@ -9,7 +9,7 @@ uv sync
 ```
 ## Run
 ```
-uv run uvicorn app.main:api --reload --port 8080
+uv run uvicorn mcp_server.main:api --reload --port 8080
 ```
 
 ## Test
