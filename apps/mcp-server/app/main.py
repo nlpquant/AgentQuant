@@ -84,6 +84,16 @@ async def yh_query_save(
                         volume=int(data_point[5]),
                     )
                 )
+            task_info = await api.state.redis.get(task_id)
+            if task_info:
+                task_entry = TaskEntry(**json.loads(task_info))
+                task_entry.storage_key = stroage_key
+                await api.state.redis.set(
+                    task_id,
+                    json.dumps(task_entry.to_dict()),
+                    ex=global_settings.task_expire,
+                )
+            logger.info(f"Task info for {task_id} updated in Redis.")
             return {
                 "task_id": task_id,
                 "status": "success",
@@ -157,6 +167,7 @@ async def yh_query_save(
                     json.dumps(timestamp_arrays),
                     ex=global_settings.data_expire,
                 )
+            logger.info(f"Data for {stroage_key} saved to Redis.")
             task_info = await api.state.redis.get(task_id)
             if task_info:
                 task_entry = TaskEntry(**json.loads(task_info))
@@ -166,7 +177,7 @@ async def yh_query_save(
                     json.dumps(task_entry.to_dict()),
                     ex=global_settings.task_expire,
                 )
-            logger.info(f"Data for {stroage_key} saved to Redis.")
+            logger.info(f"Task info for {task_id} updated in Redis.")
             return {
                 "task_id": task_id,
                 "status": "success",

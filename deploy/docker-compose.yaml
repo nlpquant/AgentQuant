@@ -1,4 +1,15 @@
 services:
+  mcp-server:
+    build: ../apps/mcp-server
+    container_name: agentquant-mcp-server
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    networks:
+      - agentquant-network
+    environment:
+      REDIS_URL: redis://redis:6379
+
   mcp-inspector:
     image: ghcr.io/modelcontextprotocol/inspector:latest
     container_name: agentquant-mcp-inspector
