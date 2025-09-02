@@ -1,2 +1,0 @@
-langchain-tavily>=0.2.11
-nvidia-nat[langchain]>=1.2.1

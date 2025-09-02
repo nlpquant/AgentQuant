@@ -1,2 +1,0 @@
-[nat.components]
-agent = agent.register
