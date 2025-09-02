@@ -6,3 +6,10 @@ dependencies = [
     "langchain-tavily>=0.2.11",
     "nvidia-nat[langchain]>=1.2.1",
 ]
+
+[build-system]
+build-backend = "setuptools.build_meta"
+requires = ["setuptools >= 64", "setuptools-scm>=8"]
+
+[project.entry-points.'nat.components']
+agent = "agent.register"

@@ -1,0 +1,21 @@
+meta {
+  name: SPY RSI 2yr
+  type: http
+  seq: 5
+}
+
+post {
+  url: http://localhost:8000/generate
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "input_message": "Backtest RSI mean reversion strategy on SPY with 14-period RSI in last two years?"
+  }
+}

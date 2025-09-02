@@ -15,11 +15,25 @@ uv run nat serve --config_file configs/config.yaml
 
 ## Test
 ```
-➜ curl --request POST \
+curl --request POST \
   --url http://localhost:8000/generate \
   --header 'Content-Type: application/json' \
   --data '{
-    "input_message": "Backtest RSI mean reversion strategy on SPY with 14-period RSI?",
-    "use_knowledge_base": true
+    "input_message": "Backtest RSI mean reversion strategy on SPY with 14-period RSI?"
+}'
+
+
+curl --request POST \
+  --url http://localhost:8000/generate \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "input_message": "Test 50/200 MA crossover strategy on AAPL from 2020-2024 and require the RSI to be below 30 at the time of purchase."
+}'
+
+curl --request POST \
+  --url http://localhost:8000/generate \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "input_message": "Backtest RSI mean reversion strategy on SPY with 14-period RSI?"
 }'
 ```

@@ -1,0 +1,21 @@
+meta {
+  name: AAPL MA
+  type: http
+  seq: 1
+}
+
+post {
+  url: http://localhost:8000/generate
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "input_message": "Test 50/200 MA crossover strategy on AAPL from 2020-2024 and require the RSI to be below 30 at the time of purchase."
+  }
+}
