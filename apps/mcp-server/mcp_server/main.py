@@ -3,12 +3,12 @@ import json
 import uuid
 from fastapi import FastAPI
 import pandas as pd
-from app.logging import AppLogger
-from app.redis import init_redis_pool
-from app.sse import create_sse_server
+from mcp_server.logging import AppLogger
+from mcp_server.redis import init_redis_pool
+from mcp_server.sse import create_sse_server
 from mcp.server.fastmcp import FastMCP
-from app.models import OHLCVData, TaskEntry
-from app.config import settings as global_settings
+from mcp_server.models import OHLCVData, TaskEntry
+from mcp_server.config import settings as global_settings
 import yfinance as yf
 
 logger = AppLogger().get_logger()
