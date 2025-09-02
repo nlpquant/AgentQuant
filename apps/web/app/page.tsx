@@ -20,20 +20,17 @@ interface AnalysisState {
 }
 
 export default function Home() {
-  const { sendMessage } = useChat({
-    onData: data => {
-      console.log(data);
-    },
-    onError: error => {
-      console.error(error);
-    },
-    onFinish: () => {
-      console.log('Chat finished');
-    },
-    onToolCall: options => {
-      console.log('Tool call:', options);
-    },
-  });
+  const { sendMessage, messages } = useChat();
+
+  const stepMessage = messages.find(message => message.role === 'assistant');
+
+  const preview = stepMessage?.parts.find(
+    part => part.data.name === 'Function Complete: quick_preview'
+  )?.data.payload?.output;
+
+  const storageKey = stepMessage?.parts.find(
+    part => part.data.name === 'Function Complete: yh_query_save'
+  )?.data.payload?.output.storage_key;
 
   // const isLoading = status === 'submitted' || status === 'streaming';
 
@@ -157,15 +154,17 @@ export default function Home() {
           </div>
 
           {/* Data Visualization Canvas - Appears during and after analysis */}
-          {(state.isAnalyzing || state.analysisCompleted) && (
+          {preview && (
             <div className="space-y-8">
               {/* Main Chart */}
               <div className="animate-in slide-in-from-bottom-4 duration-500">
                 <CandlestickChart
                   isLoading={state.isAnalyzing}
+                  preview={preview}
                   symbol={state.isIteration ? 'AAPL' : 'TSLA'}
                   showSignals={state.analysisCompleted}
                   isRefinedStrategy={state.isIteration}
+                  storageKey={storageKey}
                 />
               </div>
 
@@ -211,11 +210,11 @@ export default function Home() {
       </main>
 
       {/* AI Agent Monitor - Appears during and after analysis */}
-      <AIAgentMonitor
-        isVisible={state.isAnalyzing || state.analysisCompleted}
-        isCompleted={state.analysisCompleted}
-        isRefinedStrategy={state.isIteration}
-      />
+      {/*<AIAgentMonitor*/}
+      {/*  isVisible={state.isAnalyzing || state.analysisCompleted}*/}
+      {/*  isCompleted={state.analysisCompleted}*/}
+      {/*  isRefinedStrategy={state.isIteration}*/}
+      {/*/>*/}
     </div>
   );
 }
