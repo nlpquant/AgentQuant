@@ -1,0 +1,55 @@
+services:
+  mcp-inspector:
+    image: ghcr.io/modelcontextprotocol/inspector:latest
+    container_name: agentquant-mcp-inspector
+    restart: unless-stopped
+    ports:
+      - "6274:6274"
+      - "6277:6277"
+    networks:
+      - agentquant-network
+    environment:
+      DANGEROUSLY_OMIT_AUTH: "true"
+      HOST: 0.0.0.0
+
+  redis:
+    image: redis:7-alpine
+    container_name: agentquant-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - agentquant-network
+
+  redis-insight:
+    image: redislabs/redisinsight:latest
+    container_name: agentquant-redis-insight
+    restart: unless-stopped
+    environment:
+      RI_REDIS_HOST: redis
+      RI_REDIS_PORT: 6379
+
+    ports:
+      - "5540:5540"
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - agentquant-network
+
+volumes:
+  redis_data:
+    driver: local
+
+networks:
+  agentquant-network:
+    driver: bridge
+    name: agentquant-network
