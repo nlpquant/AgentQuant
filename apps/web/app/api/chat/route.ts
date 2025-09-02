@@ -1,16 +1,66 @@
-// app/api/chat/route.ts
-// NO import from 'ai' is needed for the response itself, only for types if you use them.
 import { TextUIPart, type UIMessage } from 'ai';
 
 export const maxDuration = 60;
 
-// Define your custom data structure
 interface IntermediateData {
   id: string;
   parent_id: string;
   type: string;
   name: string;
-  payload: string;
+  payload: string | { input: any; output: any };
+}
+interface OpenAIChatChunk {
+  choices: { delta?: { content: string } }[];
+}
+
+type ParsedPayloadValue = Record<string, unknown> | string | null;
+
+function parsePayload(payload: string): {
+  input: ParsedPayloadValue;
+  output: ParsedPayloadValue;
+} {
+  const result: { input: ParsedPayloadValue; output: ParsedPayloadValue } = {
+    input: null,
+    output: null,
+  };
+
+  const inputRegex =
+    /\*\*Function Input:\*\*\s*```(?:json|python)\n([\s\S]*?)\n```/;
+  const outputRegex =
+    /\*\*Function Output:\*\*\s*```(?:json|python)\n([\s\S]*?)\n```/;
+
+  const inputMatch = payload.match(inputRegex);
+  const outputMatch = payload.match(outputRegex);
+
+  // 提取、清理并解析 Input
+  if (inputMatch && inputMatch[1]) {
+    try {
+      const sanitizedString = inputMatch[1]
+        .replace(/\bNone\b/g, 'null')
+        .replace(/\bTrue\b/g, 'true')
+        .replace(/\bFalse\b/g, 'false')
+        .replace(/'/g, '"');
+      result.input = JSON.parse(sanitizedString);
+    } catch (e) {
+      console.error('Failed to parse Function Input:', inputMatch[1], e);
+    }
+  }
+
+  if (outputMatch && outputMatch[1]) {
+    try {
+      const sanitizedString = outputMatch[1]
+        .replace(/\bNone\b/g, 'null')
+        .replace(/\bTrue\b/g, 'true')
+        .replace(/\bFalse\b/g, 'false')
+        .replace(/'/g, '"');
+      result.output = JSON.parse(sanitizedString);
+    } catch (e) {
+      console.warn('Could not parse Function Output as JSON:', outputMatch[1]);
+      result.output = outputMatch[1];
+    }
+  }
+
+  return result;
 }
 
 export async function POST(req: Request) {
@@ -19,17 +69,26 @@ export async function POST(req: Request) {
 
     const response = await fetch('http://localhost:8000/v1/chat/completions', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         messages: messages.map(message => ({
           role: message.role,
-          content: (message.parts[0] as TextUIPart).text,
+          content:
+            (message.parts.find(part => part.type === 'text') as TextUIPart)
+              ?.text || '',
         })),
         stream: true,
       }),
     });
+
+    if (!response.ok) {
+      const errorBody = await response.text();
+      console.error(
+        `Upstream API failed with status ${response.status}:`,
+        errorBody
+      );
+      throw new Error(`Upstream API error: ${response.statusText}`);
+    }
 
     if (!response.body) {
       throw new Error('Response body is empty');
@@ -55,6 +114,11 @@ export async function POST(req: Request) {
                 const jsonString = line.substring('intermediate_data:'.length);
                 try {
                   const jsonData: IntermediateData = JSON.parse(jsonString);
+
+                  if (typeof jsonData.payload === 'string') {
+                    jsonData.payload = parsePayload(jsonData.payload);
+                  }
+
                   controller.enqueue(
                     `data: ${JSON.stringify({ type: 'data-json', data: jsonData })}\n\n`
                   );
@@ -65,14 +129,12 @@ export async function POST(req: Request) {
             } else if (line.startsWith('data:')) {
               const jsonString = line.substring('data:'.length);
               try {
-                const json = JSON.parse(jsonString);
-                const content =
-                  json.choices[0]?.delta?.content ||
-                  json.choices[0]?.message?.content ||
-                  '';
+                const json: OpenAIChatChunk = JSON.parse(jsonString);
+                const content = json.choices[0]?.delta?.content || '';
+
                 if (content) {
                   controller.enqueue(
-                    `data: ${JSON.stringify({ type: 'data-json', data: content })}\n\n`
+                    `data: ${JSON.stringify({ type: 'text', text: content })}\n\n`
                   );
                 }
               } catch (e) {
@@ -85,13 +147,11 @@ export async function POST(req: Request) {
     });
 
     const customStream = response.body.pipeThrough(transformStream);
-
-    // Manually create a Response object with the correct headers.
-    // This replaces the deprecated StreamingTextResponse helper.
     return new Response(customStream, {
       headers: {
-        'Content-Type': 'text/plain; charset=utf-8',
-        'X-Content-Type-Options': 'nosniff', // Recommended security header
+        'Content-Type': 'text/event-stream; charset=utf-8',
+        'Cache-Control': 'no-cache, no-transform',
+        Connection: 'keep-alive',
       },
     });
   } catch (error) {
