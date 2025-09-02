@@ -55,7 +55,9 @@ export async function POST(req: Request) {
                 const jsonString = line.substring('intermediate_data:'.length);
                 try {
                   const jsonData: IntermediateData = JSON.parse(jsonString);
-                  controller.enqueue(`2:${JSON.stringify(jsonData)}\n`);
+                  controller.enqueue(
+                    `data: ${JSON.stringify({ type: 'data-json', data: jsonData })}\n\n`
+                  );
                 } catch (e) {
                   console.error('Failed to parse intermediate_data JSON:', e);
                 }
