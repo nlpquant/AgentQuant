@@ -10,6 +10,7 @@ import { CandlestickChart } from '../components/agentquant/CandlestickChart';
 import { RSIIndicator } from '../components/agentquant/RSIIndicator';
 import { KPICards } from '../components/agentquant/KPICards';
 import { AIAgentMonitor } from '../components/agentquant/AIAgentMonitor';
+import { useChat, useCompletion } from '@ai-sdk/react';
 
 interface AnalysisState {
   isAnalyzing: boolean;
@@ -19,6 +20,23 @@ interface AnalysisState {
 }
 
 export default function Home() {
+  const { sendMessage } = useChat({
+    onData: data => {
+      console.log(data);
+    },
+    onError: error => {
+      console.error(error);
+    },
+    onFinish: () => {
+      console.log('Chat finished');
+    },
+    onToolCall: options => {
+      console.log('Tool call:', options);
+    },
+  });
+
+  // const isLoading = status === 'submitted' || status === 'streaming';
+
   const [state, setState] = useState<AnalysisState>({
     isAnalyzing: false,
     analysisCompleted: false,
@@ -26,7 +44,7 @@ export default function Home() {
     isIteration: false,
   });
 
-  const handleAnalyze = (query: string) => {
+  const handleAnalyze = async (query: string) => {
     const isQueryIteration =
       query.toLowerCase().includes('rsi') ||
       query.toLowerCase().includes('refinement') ||
@@ -40,14 +58,15 @@ export default function Home() {
       isIteration: isQueryIteration,
     });
 
-    const analysisTime = isQueryIteration ? 2000 : 3000;
-    setTimeout(() => {
-      setState(prev => ({
-        ...prev,
-        isAnalyzing: false,
-        analysisCompleted: true,
-      }));
-    }, analysisTime);
+    // const analysisTime = isQueryIteration ? 2000 : 3000;
+    // setTimeout(() => {
+    //   setState(prev => ({
+    //     ...prev,
+    //     isAnalyzing: false,
+    //     analysisCompleted: true,
+    //   }));
+    // }, analysisTime);
+    await sendMessage({ text: query });
   };
 
   const handleNewAnalysis = (query: string) => {
