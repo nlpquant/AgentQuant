@@ -60,6 +60,7 @@ function parsePayload(payload: string): {
     }
   }
 
+  console.log('[Parsed Payload]:', result);
   return result;
 }
 
