@@ -38,10 +38,15 @@ interface IndicatorData {
   params: IndicatorParams;
 }
 
+interface CalculatedIndicator {
+  data: { time: string; value: number }[];
+  name: string;
+}
+
 const calculateIndicator = (
   indicatorData: IndicatorData,
   priceData: any[]
-): { time: string; value: number }[] => {
+): CalculatedIndicator[] => {
   const { name, params } = indicatorData;
   const closePrices = priceData.map((item: any) => item.close);
 
@@ -51,10 +56,11 @@ const calculateIndicator = (
         period: params.period || 20,
         values: closePrices,
       });
-      return smaValues.map((value, index) => ({
+      const data = smaValues.map((value, index) => ({
         time: priceData[index + (params.period || 20) - 1].time,
         value,
       }));
+      return [{ data, name: `SMA(${params.period || 20})` }];
     }
 
     case 'RSI': {
@@ -62,10 +68,11 @@ const calculateIndicator = (
         period: params.period || 14,
         values: closePrices,
       });
-      return rsiValues.map((value, index) => ({
+      const data = rsiValues.map((value, index) => ({
         time: priceData[index + (params.period || 14) - 1].time,
         value,
       }));
+      return [{ data, name: `RSI(${params.period || 14})` }];
     }
 
     case 'BOLLINGERBANDS':
@@ -75,11 +82,31 @@ const calculateIndicator = (
         stdDev: params.stdDev || 2,
         values: closePrices,
       });
-      // Return middle band (SMA) - can be extended to return upper/lower bands
-      return bbData.map((value, index) => ({
-        time: priceData[index + (params.period || 20) - 1].time,
+
+      const period = params.period || 20;
+      const stdDev = params.stdDev || 2;
+
+      // Return all three bands
+      const upperBand = bbData.map((value, index) => ({
+        time: priceData[index + period - 1].time,
+        value: value.upper,
+      }));
+
+      const middleBand = bbData.map((value, index) => ({
+        time: priceData[index + period - 1].time,
         value: value.middle,
       }));
+
+      const lowerBand = bbData.map((value, index) => ({
+        time: priceData[index + period - 1].time,
+        value: value.lower,
+      }));
+
+      return [
+        { data: upperBand, name: `BB Upper(${period},${stdDev})` },
+        { data: middleBand, name: `BB Middle(${period},${stdDev})` },
+        { data: lowerBand, name: `BB Lower(${period},${stdDev})` },
+      ];
     }
 
     default:
@@ -93,7 +120,6 @@ const indicatorColors = ['#FFD700', '#1E90FF', '#32CD32', '#FF6347', '#9370DB'];
 export function CandlestickChart({
   preview,
   storageKey,
-  isAnalyzing = false,
 }: CandlestickChartProps) {
   const { data, isLoading } = useQuery({
     queryKey: ['ticker', storageKey],
@@ -137,18 +163,39 @@ export function CandlestickChart({
     const newSeries = chart.addSeries(CandlestickSeries);
     newSeries.setData(data.data);
 
-    preview.indicators?.forEach(
-      (indicator: IndicatorData, indicatorIndex: number) => {
-        const calculated = calculateIndicator(indicator, data.data);
-        if (calculated.length > 0) {
+    let seriesColorIndex = 0;
+    preview.indicators?.forEach((indicator: IndicatorData) => {
+      const calculatedSeries = calculateIndicator(indicator, data.data);
+      calculatedSeries.forEach(calculatedData => {
+        if (calculatedData.data.length > 0) {
+          // Special styling for Bollinger Bands
+          const isBollingerBands =
+            indicator.name.toUpperCase().includes('BB') ||
+            indicator.name.toUpperCase().includes('BOLLINGERBANDS');
+
+          let lineWidth: 1 | 2 | 3 | 4 = 2;
+          let lineStyle: 0 | 1 | 2 | 3 = 0; // Solid line
+
+          if (isBollingerBands) {
+            if (
+              calculatedData.name.includes('Upper') ||
+              calculatedData.name.includes('Lower')
+            ) {
+              lineWidth = 1;
+              lineStyle = 2; // Dashed line
+            }
+          }
+
           const series = chart.addSeries(LineSeries, {
-            color: indicatorColors[indicatorIndex % indicatorColors.length],
-            lineWidth: 2,
+            color: indicatorColors[seriesColorIndex % indicatorColors.length],
+            lineWidth,
+            lineStyle,
           });
-          series.setData(calculated);
+          series.setData(calculatedData.data);
+          seriesColorIndex++;
         }
-      }
-    );
+      });
+    });
 
     window.addEventListener('resize', handleResize);
 
