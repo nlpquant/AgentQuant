@@ -6,6 +6,7 @@ import { useQuery, QueryFunctionContext } from '@tanstack/react-query';
 interface CandlestickChartProps {
   preview: any;
   storageKey?: string;
+  isAnalyzing?: boolean;
 }
 
 const chartColors = {
@@ -36,8 +37,9 @@ const indicatorColors = ['yellow', 'blue'];
 export function CandlestickChart({
   preview,
   storageKey,
+  isAnalyzing = false,
 }: CandlestickChartProps) {
-  const { data } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ['ticker', storageKey],
     queryFn: fetchTickerData,
     enabled: !!storageKey,
@@ -45,12 +47,12 @@ export function CandlestickChart({
   const chartContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!data) return;
+    if (!data || !chartContainerRef.current) return;
     const handleResize = () => {
       chart.applyOptions({ width: chartContainerRef.current?.clientWidth });
     };
 
-    const chart = createChart(chartContainerRef.current!!, {
+    const chart = createChart(chartContainerRef.current, {
       width: chartContainerRef.current?.clientWidth,
       height: 500,
       layout: {
@@ -103,7 +105,73 @@ export function CandlestickChart({
 
       chart.remove();
     };
-  }, [data, preview.ticker, preview.time_frame, preview.indicators]);
+  }, [data, preview?.ticker, preview?.time_frame, preview?.indicators]);
+
+  // Show loading state only when we don't have the required data
+  const showLoading = !data || !preview || isLoading;
+
+  // Debug logging
+  console.log('CandlestickChart debug:', {
+    isAnalyzing,
+    storageKey,
+    isLoading,
+    hasData: !!data,
+    hasPreview: !!preview,
+    showLoading,
+  });
+
+  if (showLoading) {
+    return (
+      <div
+        className="flex items-center justify-center bg-card border border-border rounded-xl"
+        style={{ height: '500px' }}
+      >
+        <div className="flex flex-col items-center space-y-4">
+          {/* Animated chart icon */}
+          <div className="relative">
+            <div className="w-12 h-12 border-2 border-primary/20 rounded-lg bg-primary/5 flex items-center justify-center">
+              <svg
+                className="w-6 h-6 text-primary animate-pulse"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                />
+              </svg>
+            </div>
+            {/* Animated dots */}
+            <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 flex space-x-1">
+              <div
+                className="w-1 h-1 bg-primary rounded-full animate-bounce"
+                style={{ animationDelay: '0ms' }}
+              ></div>
+              <div
+                className="w-1 h-1 bg-primary rounded-full animate-bounce"
+                style={{ animationDelay: '150ms' }}
+              ></div>
+              <div
+                className="w-1 h-1 bg-primary rounded-full animate-bounce"
+                style={{ animationDelay: '300ms' }}
+              ></div>
+            </div>
+          </div>
+
+          {/* Loading text */}
+          <div className="text-center">
+            <p className="text-foreground font-medium">Loading Chart Data</p>
+            <p className="text-muted-foreground text-sm">
+              {!storageKey ? 'Waiting for data...' : 'Fetching market data...'}
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={{ position: 'relative' }}>

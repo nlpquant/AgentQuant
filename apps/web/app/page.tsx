@@ -70,11 +70,15 @@ export default function Home() {
           </div>
 
           {/* Data Visualization Canvas - Appears during and after analysis */}
-          {preview && (
+          {(isAnalyzing || preview) && (
             <div className="space-y-8">
               {/* Main Chart */}
               <div className="animate-in slide-in-from-bottom-4 duration-500">
-                <CandlestickChart preview={preview} storageKey={storageKey} />
+                <CandlestickChart
+                  preview={preview}
+                  storageKey={storageKey}
+                  isAnalyzing={isAnalyzing}
+                />
               </div>
 
               {/* KPI Cards - Only show when analysis is completed */}
