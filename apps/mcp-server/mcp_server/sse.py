@@ -43,7 +43,6 @@ def create_sse_server(mcp: FastMCP):
             print(f"INFO: An exception occurred in the SSE handler: {e}")
         finally:
             print("SSE endpoint has finished.")
-
         return StreamingResponse(noop())
 
     routes = [
