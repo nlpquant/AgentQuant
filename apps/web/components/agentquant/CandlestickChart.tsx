@@ -4,10 +4,6 @@ import { createChart, CandlestickSeries, LineSeries } from 'lightweight-charts';
 import { useQuery, QueryFunctionContext } from '@tanstack/react-query';
 
 interface CandlestickChartProps {
-  isLoading?: boolean;
-  symbol?: string;
-  showSignals?: boolean;
-  isRefinedStrategy?: boolean;
   preview: any;
   storageKey?: string;
 }
@@ -38,10 +34,6 @@ const indicators = {
 const indicatorColors = ['yellow', 'blue'];
 
 export function CandlestickChart({
-  isLoading = false,
-  symbol = 'TSLA',
-  showSignals = false,
-  isRefinedStrategy = false,
   preview,
   storageKey,
 }: CandlestickChartProps) {
@@ -82,15 +74,6 @@ export function CandlestickChart({
       },
     });
 
-    const legend = document.createElement('div');
-    legend.style = `position: absolute; left: 12px; top: 12px; z-index: 1; font-size: 14px; font-family: sans-serif; line-height: 18px; font-weight: 300;`;
-    chartContainerRef.current?.appendChild(legend);
-
-    const firstRow = document.createElement('div');
-    firstRow.innerHTML = `${preview.ticker} ${preview.time_frame.toUpperCase()}`;
-    firstRow.style.color = 'white';
-    legend.appendChild(firstRow);
-
     // chart.timeScale().fitContent();
 
     const newSeries = chart.addSeries(CandlestickSeries);
@@ -111,7 +94,6 @@ export function CandlestickChart({
         lineWidth: 1,
       });
       series.setData(calculated);
-      series.setData(calculated);
     });
 
     window.addEventListener('resize', handleResize);
@@ -121,7 +103,25 @@ export function CandlestickChart({
 
       chart.remove();
     };
-  }, [data, preview.ticker, preview.time_frame]);
+  }, [data, preview.ticker, preview.time_frame, preview.indicators]);
 
-  return <div ref={chartContainerRef} style={{ position: 'relative' }} />;
+  return (
+    <div style={{ position: 'relative' }}>
+      <div ref={chartContainerRef} style={{ position: 'relative' }}>
+        {/* React-rendered legend */}
+        <div
+          className="absolute z-10 text-sm text-white font-light pointer-events-none"
+          style={{
+            left: '12px',
+            top: '12px',
+            fontFamily: 'sans-serif',
+            lineHeight: '18px',
+            fontWeight: 300,
+          }}
+        >
+          {preview?.ticker} {preview?.time_frame?.toUpperCase()}
+        </div>
+      </div>
+    </div>
+  );
 }
