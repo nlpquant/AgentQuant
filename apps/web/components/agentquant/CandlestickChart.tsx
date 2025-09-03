@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { SMA } from 'technicalindicators';
+import { SMA, RSI, BollingerBands } from 'technicalindicators';
 import { createChart, CandlestickSeries, LineSeries } from 'lightweight-charts';
 import { useQuery, QueryFunctionContext } from '@tanstack/react-query';
 
@@ -28,11 +28,67 @@ async function fetchTickerData({
   return response.json();
 }
 
-const indicators = {
-  SMA: SMA,
+interface IndicatorParams {
+  period?: number;
+  stdDev?: number;
+}
+
+interface IndicatorData {
+  name: string;
+  params: IndicatorParams;
+}
+
+const calculateIndicator = (
+  indicatorData: IndicatorData,
+  priceData: any[]
+): { time: string; value: number }[] => {
+  const { name, params } = indicatorData;
+  const closePrices = priceData.map((item: any) => item.close);
+
+  switch (name.toUpperCase()) {
+    case 'SMA': {
+      const smaValues = SMA.calculate({
+        period: params.period || 20,
+        values: closePrices,
+      });
+      return smaValues.map((value, index) => ({
+        time: priceData[index + (params.period || 20) - 1].time,
+        value,
+      }));
+    }
+
+    case 'RSI': {
+      const rsiValues = RSI.calculate({
+        period: params.period || 14,
+        values: closePrices,
+      });
+      return rsiValues.map((value, index) => ({
+        time: priceData[index + (params.period || 14) - 1].time,
+        value,
+      }));
+    }
+
+    case 'BOLLINGERBANDS':
+    case 'BB': {
+      const bbData = BollingerBands.calculate({
+        period: params.period || 20,
+        stdDev: params.stdDev || 2,
+        values: closePrices,
+      });
+      // Return middle band (SMA) - can be extended to return upper/lower bands
+      return bbData.map((value, index) => ({
+        time: priceData[index + (params.period || 20) - 1].time,
+        value: value.middle,
+      }));
+    }
+
+    default:
+      console.warn(`Unsupported indicator: ${name}`);
+      return [];
+  }
 };
 
-const indicatorColors = ['yellow', 'blue'];
+const indicatorColors = ['#FFD700', '#1E90FF', '#32CD32', '#FF6347', '#9370DB'];
 
 export function CandlestickChart({
   preview,
@@ -81,22 +137,18 @@ export function CandlestickChart({
     const newSeries = chart.addSeries(CandlestickSeries);
     newSeries.setData(data.data);
 
-    preview.indicators.forEach((indicator, indicatorIndex) => {
-      const calculated = indicators[indicator.name]
-        .calculate({
-          period: indicator.params.period,
-          values: data.data.map((item: any) => item.close),
-        })
-        .map((item, index: any) => ({
-          time: data.data[index + indicator.params.period - 1].time,
-          value: item,
-        }));
-      const series = chart.addSeries(LineSeries, {
-        color: indicatorColors[indicatorIndex],
-        lineWidth: 1,
-      });
-      series.setData(calculated);
-    });
+    preview.indicators?.forEach(
+      (indicator: IndicatorData, indicatorIndex: number) => {
+        const calculated = calculateIndicator(indicator, data.data);
+        if (calculated.length > 0) {
+          const series = chart.addSeries(LineSeries, {
+            color: indicatorColors[indicatorIndex % indicatorColors.length],
+            lineWidth: 2,
+          });
+          series.setData(calculated);
+        }
+      }
+    );
 
     window.addEventListener('resize', handleResize);
 
@@ -109,16 +161,6 @@ export function CandlestickChart({
 
   // Show loading state only when we don't have the required data
   const showLoading = !data || !preview || isLoading;
-
-  // Debug logging
-  console.log('CandlestickChart debug:', {
-    isAnalyzing,
-    storageKey,
-    isLoading,
-    hasData: !!data,
-    hasPreview: !!preview,
-    showLoading,
-  });
 
   if (showLoading) {
     return (
