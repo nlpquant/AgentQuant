@@ -25,7 +25,7 @@ const extractFunctionData = (messages: any[], functionName: string) => {
 };
 
 export default function Home() {
-  const { sendMessage, messages, status } = useChat();
+  const { sendMessage, messages, status, setMessages } = useChat();
 
   // Extract data from all assistant messages
   const preview = extractFunctionData(messages, 'quick_preview');
@@ -33,11 +33,11 @@ export default function Home() {
   const storageKey = storageData?.storage_key;
 
   // Derive UI state from messages
-  const hasStartedAnalysis = messages.length > 0;
   const isAnalyzing = status === 'submitted' || status === 'streaming';
   const isAnalysisCompleted = !!preview && !isAnalyzing;
 
   const handleAnalyze = async (query: string) => {
+    setMessages([]);
     await sendMessage({ text: query });
   };
 
