@@ -4,12 +4,17 @@ version = "0.1.0"
 requires-python = ">=3.12"
 dependencies = [
     "langchain-tavily>=0.2.11",
+    "mcp-server>=0.1.0",
+    "nvidia-nat-redis>=1.2.1",
     "nvidia-nat[langchain]>=1.2.1",
 ]
 
 [build-system]
 build-backend = "setuptools.build_meta"
 requires = ["setuptools >= 64", "setuptools-scm>=8"]
+
+[tool.uv.sources]
+mcp_server = { path = "../mcp-server", editable = true }
 
 [project.entry-points.'nat.components']
 agent = "agent.register"
