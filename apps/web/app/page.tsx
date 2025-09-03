@@ -9,23 +9,27 @@ import { CandlestickChart } from '../components/agentquant/CandlestickChart';
 import { KPICards } from '../components/agentquant/KPICards';
 import { useChat } from '@ai-sdk/react';
 
-// Helper to extract function data from message parts
-const extractFunctionData = (message: any, functionName: string) => {
-  return message?.parts?.find(
-    (part: any) => part.data?.name === `Function Complete: ${functionName}`
-  )?.data?.payload?.output;
+// Helper to extract function data from all assistant messages
+const extractFunctionData = (messages: any[], functionName: string) => {
+  for (const message of messages) {
+    if (message.role === 'assistant') {
+      const part = message?.parts?.find(
+        (part: any) => part.data?.name === `Function Complete: ${functionName}`
+      );
+      if (part) {
+        return part.data?.payload?.output;
+      }
+    }
+  }
+  return null;
 };
 
 export default function Home() {
   const { sendMessage, messages, status } = useChat();
 
-  const assistantMessage = messages.find(
-    message => message.role === 'assistant'
-  );
-
-  // Extract data from assistant message
-  const preview = extractFunctionData(assistantMessage, 'quick_preview');
-  const storageData = extractFunctionData(assistantMessage, 'yh_query_save');
+  // Extract data from all assistant messages
+  const preview = extractFunctionData(messages, 'quick_preview');
+  const storageData = extractFunctionData(messages, 'yh_query_save');
   const storageKey = storageData?.storage_key;
 
   // Derive UI state from messages
