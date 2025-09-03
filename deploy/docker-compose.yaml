@@ -1,14 +1,35 @@
 services:
-  mcp-server:
-    build: ../apps/mcp-server
-    container_name: agentquant-mcp-server
-    restart: unless-stopped
-    ports:
-      - "8080:8080"
-    networks:
-      - agentquant-network
-    environment:
-      REDIS_URL: redis://redis:6379
+  kind:
+    build: ./kind
+    container_name: agentquant-kind
+    privileged: true
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./kind:/kind-config
+      - kind_data:/kind
+    command: >
+      sh -c "
+        if ! kind get clusters | grep -q 'my-cluster'; then
+          echo 'Cluster my-cluster not found, creating it...';
+          kind create cluster --name my-cluster --config /kind-config/kind-config.yaml;
+        else
+          echo 'Cluster my-cluster already exists.';
+        fi;
+        kind get kubeconfig --name my-cluster > /kind-config/kubeconfig.yaml
+        # Keep the container running
+        tail -f /dev/null;
+      "
+
+  # mcp-server:
+  #   build: ../apps/mcp-server
+  #   container_name: agentquant-mcp-server
+  #   restart: unless-stopped
+  #   ports:
+  #     - "8080:8080"
+  #   networks:
+  #     - agentquant-network
+  #   environment:
+  #     REDIS_URL: redis://redis:6379
 
   mcp-inspector:
     image: ghcr.io/modelcontextprotocol/inspector:latest
@@ -58,6 +79,8 @@ services:
 
 volumes:
   redis_data:
+    driver: local
+  kind_data:
     driver: local
 
 networks:
