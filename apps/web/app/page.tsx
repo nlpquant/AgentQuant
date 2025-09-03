@@ -10,18 +10,30 @@ import { KPICards } from '../components/agentquant/KPICards';
 import { useChat } from '@ai-sdk/react';
 
 // Helper to extract function data from all assistant messages
+// Returns the last successful result, or the last result if no successful ones
 const extractFunctionData = (messages: any[], functionName: string) => {
+  let lastResult = null;
+  let lastSuccessfulResult = null;
+
   for (const message of messages) {
     if (message.role === 'assistant') {
-      const part = message?.parts?.find(
-        (part: any) => part.data?.name === `Function Complete: ${functionName}`
-      );
-      if (part) {
-        return part.data?.payload?.output;
+      const parts = message?.parts || [];
+      for (const part of parts) {
+        if (part.data?.name === `Function Complete: ${functionName}`) {
+          const output = part.data?.payload?.output;
+          lastResult = output;
+
+          // If this result indicates success, save it as the last successful result
+          if (output?.status === 'success' || !output?.status) {
+            lastSuccessfulResult = output;
+          }
+        }
       }
     }
   }
-  return null;
+
+  // Return the last successful result if available, otherwise the last result
+  return lastSuccessfulResult || lastResult;
 };
 
 export default function Home() {
