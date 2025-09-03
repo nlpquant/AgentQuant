@@ -1,0 +1,15 @@
+meta {
+  name: storage data
+  type: http
+  seq: 8
+}
+
+get {
+  url: http://localhost:8080/data/SPY:1d:2024-09-03:2025-09-03
+  body: json
+  auth: inherit
+}
+
+settings {
+  encodeUrl: true
+}
