@@ -4,94 +4,37 @@ import './index.css';
 
 import { BackgroundPattern } from '../components/agentquant/BackgroundPattern';
 import { Logo } from '../components/agentquant/Logo';
-import { useState } from 'react';
 import { CentralCommandBar } from '../components/agentquant/CentralCommandBar';
 import { CandlestickChart } from '../components/agentquant/CandlestickChart';
-import { RSIIndicator } from '../components/agentquant/RSIIndicator';
 import { KPICards } from '../components/agentquant/KPICards';
-import { AIAgentMonitor } from '../components/agentquant/AIAgentMonitor';
-import { useChat, useCompletion } from '@ai-sdk/react';
+import { useChat } from '@ai-sdk/react';
 
-interface AnalysisState {
-  isAnalyzing: boolean;
-  analysisCompleted: boolean;
-  analysisQuery: string;
-  isIteration: boolean;
-}
+// Helper to extract function data from message parts
+const extractFunctionData = (message: any, functionName: string) => {
+  return message?.parts?.find(
+    (part: any) => part.data?.name === `Function Complete: ${functionName}`
+  )?.data?.payload?.output;
+};
 
 export default function Home() {
-  const { sendMessage, messages } = useChat();
+  const { sendMessage, messages, status } = useChat();
 
-  const stepMessage = messages.find(message => message.role === 'assistant');
+  const assistantMessage = messages.find(
+    message => message.role === 'assistant'
+  );
 
-  const preview = stepMessage?.parts.find(
-    part => part.data.name === 'Function Complete: quick_preview'
-  )?.data.payload?.output;
+  // Extract data from assistant message
+  const preview = extractFunctionData(assistantMessage, 'quick_preview');
+  const storageData = extractFunctionData(assistantMessage, 'yh_query_save');
+  const storageKey = storageData?.storage_key;
 
-  const storageKey = stepMessage?.parts.find(
-    part => part.data.name === 'Function Complete: yh_query_save'
-  )?.data.payload?.output.storage_key;
-
-  // const isLoading = status === 'submitted' || status === 'streaming';
-
-  const [state, setState] = useState<AnalysisState>({
-    isAnalyzing: false,
-    analysisCompleted: false,
-    analysisQuery: '',
-    isIteration: false,
-  });
+  // Derive UI state from messages
+  const hasStartedAnalysis = messages.length > 0;
+  const isAnalyzing = status === 'submitted' || status === 'streaming';
+  const isAnalysisCompleted = !!preview && !isAnalyzing;
 
   const handleAnalyze = async (query: string) => {
-    const isQueryIteration =
-      query.toLowerCase().includes('rsi') ||
-      query.toLowerCase().includes('refinement') ||
-      query.toLowerCase().includes('below 30') ||
-      query.toLowerCase().includes('oversold');
-
-    setState({
-      analysisQuery: query,
-      isAnalyzing: true,
-      analysisCompleted: false,
-      isIteration: isQueryIteration,
-    });
-
-    // const analysisTime = isQueryIteration ? 2000 : 3000;
-    // setTimeout(() => {
-    //   setState(prev => ({
-    //     ...prev,
-    //     isAnalyzing: false,
-    //     analysisCompleted: true,
-    //   }));
-    // }, analysisTime);
     await sendMessage({ text: query });
-  };
-
-  const handleNewAnalysis = (query: string) => {
-    setState(prev => ({ ...prev, analysisCompleted: false }));
-    handleAnalyze(query);
-  };
-
-  const handleIterationDemo = () => {
-    const refinedQuery =
-      'Test 50/200 MA crossover strategy on AAPL from 2020-2024 and require the RSI to be below 30 at the time of purchase.';
-    handleNewAnalysis(refinedQuery);
-  };
-
-  const resetDemo = () => {
-    setState({
-      isAnalyzing: false,
-      analysisCompleted: false,
-      analysisQuery: '',
-      isIteration: false,
-    });
-  };
-
-  const completeAnalysis = () => {
-    setState(prev => ({
-      ...prev,
-      isAnalyzing: false,
-      analysisCompleted: true,
-    }));
   };
 
   return (
@@ -102,34 +45,6 @@ export default function Home() {
       <header className="relative z-10 px-6 py-8">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <Logo />
-
-          {/* Demo Controls - for testing the UI states */}
-          <div className="flex items-center space-x-2">
-            {state.analysisCompleted && !state.isIteration && (
-              <button
-                onClick={handleIterationDemo}
-                className="px-3 py-1 text-xs bg-success hover:bg-success/90 text-success-foreground rounded-md transition-colors"
-              >
-                Try RSI Refinement
-              </button>
-            )}
-            {state.analysisCompleted && (
-              <button
-                onClick={resetDemo}
-                className="px-3 py-1 text-xs bg-secondary hover:bg-secondary/80 text-secondary-foreground rounded-md transition-colors"
-              >
-                Reset Demo
-              </button>
-            )}
-            {state.isAnalyzing && (
-              <button
-                onClick={completeAnalysis}
-                className="px-3 py-1 text-xs bg-primary hover:bg-primary/90 text-primary-foreground rounded-md transition-colors"
-              >
-                Complete Analysis
-              </button>
-            )}
-          </div>
         </div>
       </header>
 
@@ -139,17 +54,14 @@ export default function Home() {
           {/* Central Command Section */}
           <div
             className={`transition-all duration-500 ${
-              state.isAnalyzing || state.analysisCompleted
+              isAnalyzing || isAnalysisCompleted
                 ? 'mb-8'
                 : 'flex items-center justify-center min-h-[60vh]'
             }`}
           >
             <CentralCommandBar
-              isAnalyzing={state.isAnalyzing}
-              onAnalyze={
-                state.analysisCompleted ? handleNewAnalysis : handleAnalyze
-              }
-              currentQuery={state.analysisQuery}
+              isAnalyzing={isAnalyzing}
+              onAnalyze={handleAnalyze}
             />
           </div>
 
@@ -158,27 +70,11 @@ export default function Home() {
             <div className="space-y-8">
               {/* Main Chart */}
               <div className="animate-in slide-in-from-bottom-4 duration-500">
-                <CandlestickChart
-                  isLoading={state.isAnalyzing}
-                  preview={preview}
-                  symbol={state.isIteration ? 'AAPL' : 'TSLA'}
-                  showSignals={state.analysisCompleted}
-                  isRefinedStrategy={state.isIteration}
-                  storageKey={storageKey}
-                />
+                <CandlestickChart preview={preview} storageKey={storageKey} />
               </div>
 
-              {/* RSI Indicator Panel - Only show for refined strategy */}
-              {state.analysisCompleted && state.isIteration && (
-                <RSIIndicator
-                  isVisible={true}
-                  symbol="AAPL"
-                  showOversoldMarkers={true}
-                />
-              )}
-
               {/* KPI Cards - Only show when analysis is completed */}
-              {state.analysisCompleted && (
+              {isAnalysisCompleted && (
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                   {/* Charts column - could add more charts here */}
                   <div className="lg:col-span-2">
@@ -187,10 +83,7 @@ export default function Home() {
 
                   {/* KPI Cards column */}
                   <div className="lg:col-span-1">
-                    <KPICards
-                      isVisible={true}
-                      isRefinedStrategy={state.isIteration}
-                    />
+                    <KPICards isVisible={true} isRefinedStrategy={false} />
                   </div>
                 </div>
               )}
@@ -198,7 +91,7 @@ export default function Home() {
           )}
 
           {/* Footer tagline */}
-          {!state.isAnalyzing && !state.analysisCompleted && (
+          {!isAnalyzing && !isAnalysisCompleted && (
             <div className="text-center mt-16 pt-8 border-t border-border/50">
               <p className="text-sm text-muted-foreground">
                 Powered by advanced AI • Real-time market data •
