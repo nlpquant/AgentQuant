@@ -63,6 +63,9 @@ def create_job(task_id: str, storage_key: str, code: str, logger: Logger):
                     "ignore::SyntaxWarning",
                     "/mnt/data/code/code.py",
                 ],
+                env=[
+                    client.V1EnvVar(name="RAW_DATA_FILE", value="/mnt/data/output.json")
+                ],
                 volume_mounts=[
                     client.V1VolumeMount(name="data-volume", mount_path="/mnt/data"),
                     client.V1VolumeMount(

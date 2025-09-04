@@ -42,7 +42,6 @@ class TaskEntry(BaseModel):
 class OHLCVData(BaseModel):
     """OHLCV data point."""
 
-    date: str
     timestamp: Optional[int] = None
     open: float
     high: float

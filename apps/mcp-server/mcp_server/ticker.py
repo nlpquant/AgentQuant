@@ -17,6 +17,8 @@ interval_timeframe_map = {
     "1M": "1mo",
 }
 
+DIGIT_PRECISION = 4
+
 
 def query_ticker_historical_data(
     ticker, start_date, end_date, time_frame
@@ -37,9 +39,7 @@ def yfinance_to_ohlcv(data: pd.DataFrame) -> list:
     ohlcv_data = []
     for index, row in data.iterrows():
         try:
-            # Handle both DatetimeIndex and regular index
             if hasattr(index, "strftime"):
-                date_str = index.strftime("%Y-%m-%d")
                 timestamp = int(index.timestamp() * 1000)
             else:
                 date_str = str(index)[:10]
@@ -50,12 +50,11 @@ def yfinance_to_ohlcv(data: pd.DataFrame) -> list:
                     timestamp = 0
             ohlcv_data.append(
                 OHLCVData(
-                    date=date_str,
                     timestamp=timestamp,
-                    open=round(float(row["Open"]), 4),
-                    high=round(float(row["High"]), 4),
-                    low=round(float(row["Low"]), 4),
-                    close=round(float(row["Close"]), 4),
+                    open=round(float(row["Open"]), DIGIT_PRECISION),
+                    high=round(float(row["High"]), DIGIT_PRECISION),
+                    low=round(float(row["Low"]), DIGIT_PRECISION),
+                    close=round(float(row["Close"]), DIGIT_PRECISION),
                     volume=(int(row["Volume"]) if not pd.isna(row["Volume"]) else 0),
                 )
             )
@@ -68,13 +67,9 @@ def redis_to_ohlcv(data: list) -> list:
     """Convert raw data to OHLCV format."""
     ohlcv_data = []
     for data_point in data:
-        timestamp = data_point[0]
-        dt = datetime.fromtimestamp(timestamp / 1000)
-        date_str = dt.strftime("%Y-%m-%d")
         ohlcv_data.append(
             OHLCVData(
-                date=date_str,
-                timestamp=int(timestamp),
+                timestamp=data_point[0],
                 open=data_point[1],
                 high=data_point[2],
                 low=data_point[3],

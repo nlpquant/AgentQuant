@@ -242,3 +242,116 @@ def generate_execution_code(strategy_code, initial_cash, ticker, start_date, end
         start_date=start_date,
         end_date=end_date,
     )
+
+
+EXECUTION_WITH_DATA_TEMPLATE = """
+import os
+import backtrader as bt
+import pandas as pd
+import json
+
+# Generated strategy code
+{{strategy_code}}
+
+
+def raw_to_ohlcv(data_file: str) -> pd.DataFrame:
+    with open(data_file, "r") as f:
+        raw_data = json.loads(f.read())
+        columns = ['timestamp', 'Open', 'High', 'Low', 'Close', 'Volume']
+        df = pd.DataFrame(raw_data, columns=columns)
+        target_column_order = ["Close", "High", "Low", "Open", "Volume"]
+        df_final = (
+            df.assign(Date=pd.to_datetime(df['timestamp'], unit='ms').dt.normalize())
+            .set_index('Date')
+            .drop(columns=['timestamp'])
+            .reindex(columns=target_column_order)
+        )
+        df_final['Volume'] = df_final['Volume'].astype(int)
+    return df_final
+
+def run_backtest():
+    try:
+        # Create a minimal Cerebro instance to avoid complex broker interactions
+        cerebro = bt.Cerebro()
+
+        # Add strategy
+        cerebro.addstrategy(GeneratedStrategy)
+        cerebro.addanalyzer(bt.analyzers.SharpeRatio, _name='sharpe')
+        cerebro.addanalyzer(bt.analyzers.DrawDown, _name='drawdown')
+        cerebro.addanalyzer(bt.analyzers.TradeAnalyzer, _name='trades')
+
+        data = raw_to_ohlcv(os.getenv("RAW_DATA_FILE"))
+
+        # Create data feed with standard configuration
+        data_feed = bt.feeds.PandasData(dataname=data)
+        cerebro.adddata(data_feed)
+
+        # Set initial cash
+        cerebro.broker.setcash({{initial_cash}})
+        cerebro.addsizer(bt.sizers.PercentSizer, percents=100)
+        # Skip commission setting to avoid _name attribute errors in crossover strategies
+        # Commission will default to 0 which is fine for backtesting
+
+        # Run backtest
+        strategies = cerebro.run()
+        if not strategies or len(strategies) == 0:
+            raise ValueError("No strategies returned from cerebro.run()")
+        strategy = strategies[0]
+
+        # Get results
+        final_value = cerebro.broker.getvalue()
+
+        # Check if strategy has required methods
+        if not hasattr(strategy, 'get_signals'):
+            raise AttributeError("Strategy does not have get_signals method - inheritance issue")
+        if not hasattr(strategy, 'get_trades'):
+            raise AttributeError("Strategy does not have get_trades method - inheritance issue")
+        # if not hasattr(strategy, 'get_performance_summary'):
+        #     raise AttributeError("Strategy does not have get_performance_summary method - inheritance issue")
+
+        # Extract analyzer results
+        sharpe = strategy.analyzers.sharpe.get_analysis().get('sharperatio', None)
+        drawdown = strategy.analyzers.drawdown.get_analysis().max.drawdown
+        trades = strategy.analyzers.trades.get_analysis()
+
+        # Example win rate from trades analyzer
+        total_trades = trades.total.closed if hasattr(trades.total, 'closed') else 0
+        won_trades = trades.won.total if hasattr(trades.won, 'total') else 0
+        win_rate = (won_trades / total_trades * 100) if total_trades > 0 else 0
+
+        return {
+            'success': True,
+            'final_value': final_value,
+            'initial_cash': {{initial_cash}},
+            'kpis': {
+                'sharpe_ratio': sharpe,
+                'max_drawdown': drawdown,
+                'total_return': ((final_value - {{initial_cash}}) / {{initial_cash}}) * 100,
+                'win_rate': win_rate,
+                'total_trades': total_trades,
+            },
+            'signals': strategy.get_signals(),
+            'trades': strategy.get_trades()
+        }
+
+    except Exception as e:
+        import traceback
+        return {
+            'success': False,
+            'error': str(e),
+            'error_type': type(e).__name__,
+            'traceback': traceback.format_exc()
+        }
+
+if __name__ == '__main__':
+    result = run_backtest()
+    print(json.dumps(result, default=str))
+"""
+
+
+execution_with_data_template = Template(EXECUTION_WITH_DATA_TEMPLATE.strip())
+
+def generate_execution_with_data_code(strategy_code, initial_cash):
+    return execution_with_data_template.render(
+        strategy_code=strategy_code, initial_cash=initial_cash
+    )
