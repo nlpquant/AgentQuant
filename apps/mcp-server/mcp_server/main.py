@@ -5,7 +5,11 @@ from datetime import datetime
 import pandas as pd
 import yfinance as yf
 
-from mcp_server.generator import generate_execution_code, generate_strategy_code
+from mcp_server.generator import (
+    generate_execution_code,
+    generate_execution_with_data_code,
+    generate_strategy_code,
+)
 from mcp_server.k8s import create_job, init_k8s_client, watch_job
 from mcp_server.logging import AppLogger
 from mcp_server.redis import init_redis_pool
@@ -117,11 +121,7 @@ async def yh_query_save(
                     ex=global_settings.task_expire,
                 )
             logger.debug(f"Task info for {task_id} updated in Redis.")
-            return {
-                "task_id": task_id,
-                "status": "success",
-                "storage_key": stroage_key
-            }
+            return {"task_id": task_id, "status": "success", "storage_key": stroage_key}
     except Exception as e:
         logger.error(f"Failed to query Redis: {e}")
         return {"task_id": task_id, "status": "failed", "message": str(e)}
@@ -148,12 +148,9 @@ async def code_executor(task_id: str) -> dict:
             init_code=task_entry.code.get("init_code"),
             next_code=task_entry.code.get("next_code"),
         )
-        execution_code = generate_execution_code(
+        execution_code = generate_execution_with_data_code(
             strategy_code=strategy_code,
             initial_cash=100000.0,
-            ticker=task_entry.ticker,
-            start_date=task_entry.start_date,
-            end_date=task_entry.end_date,
         )
         job = create_job(task_id, storage_key, execution_code, logger=logger)
         result = watch_job(job, timeout=global_settings.job_runner_timeout)
