@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(
-  request: NextRequest,
+  _: NextRequest,
   { params }: { params: Promise<{ storageKey: string }> }
 ) {
   const { storageKey } = await params;
@@ -19,7 +19,7 @@ export async function GET(
     }
 
     const data = await response.json();
-    const newData = data.data.map(item => ({
+    const newData = data.data.map((item: { timestamp: number }) => ({
       ...item,
       time: item.timestamp / 1000,
     }));
