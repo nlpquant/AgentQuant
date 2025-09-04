@@ -112,6 +112,21 @@ export function KPICards({
     return 'neutral';
   };
 
+  // Metric evaluation system to eliminate repetitive conditionals
+  const evaluateMetric = (
+    value: number,
+    thresholds: { good: number; fair?: number },
+    labels: { good: string; fair?: string; poor: string }
+  ) => {
+    if (value > thresholds.good) {
+      return { change: labels.good, changeType: 'positive' as const };
+    }
+    if (thresholds.fair !== undefined && value > thresholds.fair) {
+      return { change: labels.fair!, changeType: 'neutral' as const };
+    }
+    return { change: labels.poor, changeType: 'negative' as const };
+  };
+
   // Only show KPIs if we have real performance metrics
   if (!performanceMetrics) {
     return (
@@ -128,6 +143,24 @@ export function KPICards({
     );
   }
 
+  const sharpeEvaluation = evaluateMetric(
+    performanceMetrics.sharpe_ratio || 0,
+    { good: 1, fair: 0.5 },
+    { good: 'Good', fair: 'Fair', poor: 'Poor' }
+  );
+
+  const drawdownEvaluation = evaluateMetric(
+    performanceMetrics.max_drawdown,
+    { good: -20, fair: -35 },
+    { good: 'Low Risk', fair: 'Medium Risk', poor: 'High Risk' }
+  );
+
+  const winRateEvaluation = evaluateMetric(
+    performanceMetrics.win_rate,
+    { good: 60, fair: 40 },
+    { good: 'Excellent', fair: 'Good', poor: 'Poor' }
+  );
+
   const kpis = [
     {
       title: 'Total Return',
@@ -140,49 +173,24 @@ export function KPICards({
     {
       title: 'Sharpe Ratio',
       value: formatNumber(performanceMetrics.sharpe_ratio || 0),
-      change:
-        (performanceMetrics.sharpe_ratio || 0) > 1
-          ? 'Good'
-          : (performanceMetrics.sharpe_ratio || 0) > 0.5
-            ? 'Fair'
-            : 'Poor',
-      changeType:
-        (performanceMetrics.sharpe_ratio || 0) > 1
-          ? ('positive' as const)
-          : (performanceMetrics.sharpe_ratio || 0) > 0.5
-            ? ('neutral' as const)
-            : ('negative' as const),
+      change: sharpeEvaluation.change,
+      changeType: sharpeEvaluation.changeType,
       icon: Target,
       description: 'Risk-adjusted returns',
     },
     {
       title: 'Max Drawdown',
       value: `-${formatNumber(Math.abs(performanceMetrics.max_drawdown))}%`,
-      change:
-        performanceMetrics.max_drawdown > -20
-          ? 'Low Risk'
-          : performanceMetrics.max_drawdown > -35
-            ? 'Medium Risk'
-            : 'High Risk',
-      changeType:
-        performanceMetrics.max_drawdown > -20
-          ? ('positive' as const)
-          : performanceMetrics.max_drawdown > -35
-            ? ('neutral' as const)
-            : ('negative' as const),
+      change: drawdownEvaluation.change,
+      changeType: drawdownEvaluation.changeType,
       icon: Shield,
       description: 'Peak-to-trough decline',
     },
     {
       title: 'Win Rate',
       value: `${formatNumber(performanceMetrics.win_rate)}%`,
-      change: `${performanceMetrics.total_trades} trades`,
-      changeType:
-        performanceMetrics.win_rate > 60
-          ? ('positive' as const)
-          : performanceMetrics.win_rate > 40
-            ? ('neutral' as const)
-            : ('negative' as const),
+      change: `${performanceMetrics.total_trades} trades • ${winRateEvaluation.change}`,
+      changeType: winRateEvaluation.changeType,
       icon: Target,
       description: 'Successful trades',
     },
