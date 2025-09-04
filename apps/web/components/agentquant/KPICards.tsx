@@ -145,6 +145,8 @@ export function KPICards({
     return value.toFixed(decimals);
   };
 
+  // Helper function to determine change type based on numeric value
+  // Used consistently across all metrics for uniform evaluation
   const getChangeType = (
     value: number
   ): 'positive' | 'negative' | 'neutral' => {
@@ -153,19 +155,37 @@ export function KPICards({
     return 'neutral';
   };
 
-  // Metric evaluation system to eliminate repetitive conditionals
+  // Enhanced metric evaluation system using consistent change type logic
   const evaluateMetric = (
     value: number,
     thresholds: { good: number; fair?: number },
     labels: { good: string; fair?: string; poor: string }
   ) => {
+    // Determine performance level based on thresholds
+    let changeType: 'positive' | 'negative' | 'neutral';
+    let change: string;
+
     if (value > thresholds.good) {
-      return { change: labels.good, changeType: 'positive' as const };
+      changeType = 'positive';
+      change = labels.good;
+    } else if (thresholds.fair !== undefined && value > thresholds.fair) {
+      changeType = 'neutral';
+      change = labels.fair!;
+    } else {
+      changeType = 'negative';
+      change = labels.poor;
     }
-    if (thresholds.fair !== undefined && value > thresholds.fair) {
-      return { change: labels.fair!, changeType: 'neutral' as const };
-    }
-    return { change: labels.poor, changeType: 'negative' as const };
+
+    return { change, changeType };
+  };
+
+  // Helper function for evaluating metrics based on directional performance
+  // Some metrics (like drawdown) are "good" when negative, others when positive
+  const evaluateDirectionalMetric = (
+    value: number,
+    isGoodWhenPositive: boolean = true
+  ) => {
+    return isGoodWhenPositive ? getChangeType(value) : getChangeType(-value);
   };
 
   // Only show KPIs if we have real performance metrics
