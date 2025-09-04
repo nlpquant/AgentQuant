@@ -20,7 +20,7 @@ docker-compose ps
 
 ```
 cd kind
-source .envrc # if no direnv installed
+export KUBECONFIG=$(PWD)/kubeconfig.yaml
 kubectl config get-contexts
 ```
 
