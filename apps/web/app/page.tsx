@@ -43,6 +43,8 @@ export default function Home() {
   const preview = extractFunctionData(messages, 'quick_preview');
   const storageData = extractFunctionData(messages, 'yh_query_save');
   const storageKey = storageData?.storage_key;
+  const executorData = extractFunctionData(messages, 'code_executor');
+  const performanceMetrics = executorData?.output?.kpis;
 
   // Derive UI state from messages
   const isAnalyzing = status === 'submitted' || status === 'streaming';
@@ -103,7 +105,10 @@ export default function Home() {
 
                   {/* KPI Cards column */}
                   <div className="lg:col-span-1">
-                    <KPICards isVisible={true} isRefinedStrategy={false} />
+                    <KPICards
+                      isVisible={true}
+                      performanceMetrics={performanceMetrics}
+                    />
                   </div>
                 </div>
               )}

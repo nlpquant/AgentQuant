@@ -73,87 +73,120 @@ function KPICard({
   );
 }
 
+interface PerformanceMetrics {
+  sharpe_ratio: number;
+  max_drawdown: number;
+  total_return: number;
+  win_rate: number;
+  total_trades: number;
+}
+
 interface KPICardsProps {
   isVisible?: boolean;
-  isRefinedStrategy?: boolean;
+  performanceMetrics?: PerformanceMetrics;
 }
 
 export function KPICards({
   isVisible = true,
-  isRefinedStrategy = false,
+  performanceMetrics,
 }: KPICardsProps) {
   if (!isVisible) return null;
 
-  // Different KPI values for refined strategy with RSI filter
-  const kpis = isRefinedStrategy
-    ? [
-        {
-          title: 'Total Return',
-          value: '+143.8%',
-          change: '+16.4%',
-          changeType: 'positive' as const,
-          icon: TrendingUp,
-          description: 'vs Original: +127.4%',
-        },
-        {
-          title: 'Sharpe Ratio',
-          value: '2.12',
-          change: '+15.2%',
-          changeType: 'positive' as const,
-          icon: Target,
-          description: 'Improved risk-adjusted returns',
-        },
-        {
-          title: 'Max Drawdown',
-          value: '-12.1%',
-          change: '-33.5%',
-          changeType: 'positive' as const,
-          icon: Shield,
-          description: 'Lower risk with RSI filter',
-        },
-        {
-          title: 'Win Rate',
-          value: '81.2%',
-          change: '9/11 trades',
-          changeType: 'positive' as const,
-          icon: Target,
-          description: 'Higher precision',
-        },
-      ]
-    : [
-        {
-          title: 'Total Return',
-          value: '+127.4%',
-          change: '+12.3%',
-          changeType: 'positive' as const,
-          icon: TrendingUp,
-          description: 'vs Buy & Hold: +115.1%',
-        },
-        {
-          title: 'Sharpe Ratio',
-          value: '1.84',
-          change: 'Good',
-          changeType: 'positive' as const,
-          icon: Target,
-          description: 'Risk-adjusted returns',
-        },
-        {
-          title: 'Max Drawdown',
-          value: '-18.2%',
-          change: 'Low Risk',
-          changeType: 'positive' as const,
-          icon: Shield,
-          description: 'Peak-to-trough decline',
-        },
-        {
-          title: 'Win Rate',
-          value: '68.4%',
-          change: '13/19 trades',
-          changeType: 'positive' as const,
-          icon: Target,
-          description: 'Successful trades',
-        },
-      ];
+  // Helper functions for formatting
+  const formatPercentage = (value: number) => {
+    if (value == null || isNaN(value)) return '0.00%';
+    const sign = value >= 0 ? '+' : '';
+    return `${sign}${value.toFixed(2)}%`;
+  };
+
+  const formatNumber = (value: number, decimals: number = 2) => {
+    if (value == null || isNaN(value)) return '0.00';
+    return value.toFixed(decimals);
+  };
+
+  const getChangeType = (
+    value: number
+  ): 'positive' | 'negative' | 'neutral' => {
+    if (value > 0) return 'positive';
+    if (value < 0) return 'negative';
+    return 'neutral';
+  };
+
+  // Only show KPIs if we have real performance metrics
+  if (!performanceMetrics) {
+    return (
+      <div className="animate-in slide-in-from-right-4 duration-700 delay-300">
+        <div className="mb-4">
+          <h3 className="text-lg font-semibold text-foreground mb-2">
+            Performance Metrics
+          </h3>
+          <p className="text-sm text-muted-foreground">
+            Waiting for backtest results...
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  const kpis = [
+    {
+      title: 'Total Return',
+      value: formatPercentage(performanceMetrics.total_return),
+      change: performanceMetrics.total_return > 0 ? 'Profit' : 'Loss',
+      changeType: getChangeType(performanceMetrics.total_return),
+      icon: TrendingUp,
+      description: 'Strategy performance',
+    },
+    {
+      title: 'Sharpe Ratio',
+      value: formatNumber(performanceMetrics.sharpe_ratio || 0),
+      change:
+        (performanceMetrics.sharpe_ratio || 0) > 1
+          ? 'Good'
+          : (performanceMetrics.sharpe_ratio || 0) > 0.5
+            ? 'Fair'
+            : 'Poor',
+      changeType:
+        (performanceMetrics.sharpe_ratio || 0) > 1
+          ? ('positive' as const)
+          : (performanceMetrics.sharpe_ratio || 0) > 0.5
+            ? ('neutral' as const)
+            : ('negative' as const),
+      icon: Target,
+      description: 'Risk-adjusted returns',
+    },
+    {
+      title: 'Max Drawdown',
+      value: `-${formatNumber(Math.abs(performanceMetrics.max_drawdown))}%`,
+      change:
+        performanceMetrics.max_drawdown > -20
+          ? 'Low Risk'
+          : performanceMetrics.max_drawdown > -35
+            ? 'Medium Risk'
+            : 'High Risk',
+      changeType:
+        performanceMetrics.max_drawdown > -20
+          ? ('positive' as const)
+          : performanceMetrics.max_drawdown > -35
+            ? ('neutral' as const)
+            : ('negative' as const),
+      icon: Shield,
+      description: 'Peak-to-trough decline',
+    },
+    {
+      title: 'Win Rate',
+      value: `${formatNumber(performanceMetrics.win_rate)}%`,
+      change: `${performanceMetrics.total_trades} trades`,
+      changeType:
+        performanceMetrics.win_rate > 60
+          ? ('positive' as const)
+          : performanceMetrics.win_rate > 40
+            ? ('neutral' as const)
+            : ('negative' as const),
+      icon: Target,
+      description: 'Successful trades',
+    },
+  ];
 
   return (
     <div className="animate-in slide-in-from-right-4 duration-700 delay-300">
@@ -161,11 +194,7 @@ export function KPICards({
         <h3 className="text-lg font-semibold text-foreground mb-2">
           Performance Metrics
         </h3>
-        <p className="text-sm text-muted-foreground">
-          {isRefinedStrategy
-            ? 'Golden Cross + RSI filter strategy • TSLA • 2020-2024'
-            : 'Golden Cross strategy backtest results • TSLA • 2020-2024'}
-        </p>
+        <p className="text-sm text-muted-foreground">Backtest results</p>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
@@ -189,9 +218,9 @@ export function KPICards({
               Strategy Insight
             </h4>
             <p className="text-sm text-muted-foreground">
-              {isRefinedStrategy
-                ? 'Adding RSI oversold filter (RSI < 30) significantly improved performance by reducing false signals. The strategy now enters only during oversold conditions, resulting in better risk-adjusted returns.'
-                : 'The Golden Cross strategy significantly outperformed buy-and-hold with lower volatility. Best entry signals occurred during market uptrends with strong volume confirmation.'}
+              Strategy performance analysis based on historical backtesting
+              results. Metrics show risk-adjusted returns and trade execution
+              statistics.
             </p>
           </div>
         </div>

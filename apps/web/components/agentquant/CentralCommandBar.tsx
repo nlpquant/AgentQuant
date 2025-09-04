@@ -122,7 +122,7 @@ e.g., Backtest a Golden Cross strategy for TSLA using 10-day and 30-day moving a
               title: 'Moving Average Crossover',
               description: 'Golden cross and death cross signals',
               example:
-                'Test 50/200 MA crossover strategy on AAPL from 2020-2024',
+                'Test 10/20 MA crossover strategy on AAPL from 2020-2024',
             },
             {
               title: 'Bollinger Band Breakout',
