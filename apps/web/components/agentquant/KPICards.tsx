@@ -1,6 +1,47 @@
 import { Card } from '../ui/card';
 import { TrendingUp, TrendingDown, Shield, Target } from 'lucide-react';
 
+// Performance Evaluation Thresholds
+// These constants define the business logic for evaluating trading strategy performance
+const PERFORMANCE_THRESHOLDS = {
+  // Sharpe Ratio: Measures risk-adjusted returns
+  // Values above 1.0 are considered excellent, above 0.5 are acceptable
+  SHARPE_RATIO: {
+    EXCELLENT: 1.0, // Strong risk-adjusted performance
+    ACCEPTABLE: 0.5, // Adequate risk-adjusted performance
+  },
+
+  // Maximum Drawdown: Peak-to-trough decline (negative values)
+  // Lower absolute values indicate better risk management
+  MAX_DRAWDOWN: {
+    LOW_RISK: -20, // Drawdown less than 20% is considered low risk
+    MEDIUM_RISK: -35, // Drawdown between 20-35% is medium risk
+    // Above 35% is considered high risk
+  },
+
+  // Win Rate: Percentage of profitable trades
+  // Higher percentages indicate more consistent strategy performance
+  WIN_RATE: {
+    EXCELLENT: 60, // Above 60% win rate is excellent
+    GOOD: 40, // Above 40% win rate is acceptable
+    // Below 40% may indicate strategy needs improvement
+  },
+} as const;
+
+// Performance Labels
+// Human-readable labels for different performance levels
+const PERFORMANCE_LABELS = {
+  EXCELLENT: 'Excellent',
+  GOOD: 'Good',
+  FAIR: 'Fair',
+  POOR: 'Poor',
+  LOW_RISK: 'Low Risk',
+  MEDIUM_RISK: 'Medium Risk',
+  HIGH_RISK: 'High Risk',
+  PROFIT: 'Profit',
+  LOSS: 'Loss',
+} as const;
+
 interface KPICardProps {
   title: string;
   value: string;
@@ -145,27 +186,51 @@ export function KPICards({
 
   const sharpeEvaluation = evaluateMetric(
     performanceMetrics.sharpe_ratio || 0,
-    { good: 1, fair: 0.5 },
-    { good: 'Good', fair: 'Fair', poor: 'Poor' }
+    {
+      good: PERFORMANCE_THRESHOLDS.SHARPE_RATIO.EXCELLENT,
+      fair: PERFORMANCE_THRESHOLDS.SHARPE_RATIO.ACCEPTABLE,
+    },
+    {
+      good: PERFORMANCE_LABELS.GOOD,
+      fair: PERFORMANCE_LABELS.FAIR,
+      poor: PERFORMANCE_LABELS.POOR,
+    }
   );
 
   const drawdownEvaluation = evaluateMetric(
     performanceMetrics.max_drawdown,
-    { good: -20, fair: -35 },
-    { good: 'Low Risk', fair: 'Medium Risk', poor: 'High Risk' }
+    {
+      good: PERFORMANCE_THRESHOLDS.MAX_DRAWDOWN.LOW_RISK,
+      fair: PERFORMANCE_THRESHOLDS.MAX_DRAWDOWN.MEDIUM_RISK,
+    },
+    {
+      good: PERFORMANCE_LABELS.LOW_RISK,
+      fair: PERFORMANCE_LABELS.MEDIUM_RISK,
+      poor: PERFORMANCE_LABELS.HIGH_RISK,
+    }
   );
 
   const winRateEvaluation = evaluateMetric(
     performanceMetrics.win_rate,
-    { good: 60, fair: 40 },
-    { good: 'Excellent', fair: 'Good', poor: 'Poor' }
+    {
+      good: PERFORMANCE_THRESHOLDS.WIN_RATE.EXCELLENT,
+      fair: PERFORMANCE_THRESHOLDS.WIN_RATE.GOOD,
+    },
+    {
+      good: PERFORMANCE_LABELS.EXCELLENT,
+      fair: PERFORMANCE_LABELS.GOOD,
+      poor: PERFORMANCE_LABELS.POOR,
+    }
   );
 
   const kpis = [
     {
       title: 'Total Return',
       value: formatPercentage(performanceMetrics.total_return),
-      change: performanceMetrics.total_return > 0 ? 'Profit' : 'Loss',
+      change:
+        performanceMetrics.total_return > 0
+          ? PERFORMANCE_LABELS.PROFIT
+          : PERFORMANCE_LABELS.LOSS,
       changeType: getChangeType(performanceMetrics.total_return),
       icon: TrendingUp,
       description: 'Strategy performance',
