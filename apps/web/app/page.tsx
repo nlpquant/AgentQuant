@@ -7,7 +7,9 @@ import { Logo } from '../components/agentquant/Logo';
 import { CentralCommandBar } from '../components/agentquant/CentralCommandBar';
 import { CandlestickChart } from '../components/agentquant/CandlestickChart';
 import { KPICards } from '../components/agentquant/KPICards';
+import { TradesList } from '../components/agentquant/TradesList';
 import { useChat } from '@ai-sdk/react';
+import { useTradingResults } from '../hooks/useTradingResults';
 
 // Helper to extract function data from all assistant messages
 // Returns the last successful result, or the last result if no successful ones
@@ -38,6 +40,12 @@ const extractFunctionData = (messages: any[], functionName: string) => {
 
 export default function Home() {
   const { sendMessage, messages, status, setMessages } = useChat();
+
+  // Use the trading results hook to fetch trading data automatically
+  const { data: tradingResults, isLoading: isLoadingTrades } =
+    useTradingResults(
+      messages as unknown as Parameters<typeof useTradingResults>[0]
+    );
 
   // Extract data from all assistant messages
   const preview = extractFunctionData(messages, 'quick_preview');
@@ -95,12 +103,16 @@ export default function Home() {
                 />
               </div>
 
-              {/* KPI Cards - Only show when analysis is completed */}
+              {/* KPI Cards and Trades - Only show when analysis is completed */}
               {isAnalysisCompleted && (
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                  {/* Charts column - could add more charts here */}
+                  {/* Trades column */}
                   <div className="lg:col-span-2">
-                    {/* Future: Additional charts like volume, etc. */}
+                    <TradesList
+                      trades={tradingResults?.trades || []}
+                      signals={tradingResults?.signals || []}
+                      isVisible={!isLoadingTrades && !!tradingResults?.trades}
+                    />
                   </div>
 
                   {/* KPI Cards column */}
