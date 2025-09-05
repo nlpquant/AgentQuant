@@ -2,6 +2,7 @@
 
 import './index.css';
 
+import { BackgroundPattern } from '../components/agentquant/BackgroundPattern';
 import { Logo } from '../components/agentquant/Logo';
 import { CentralCommandBar } from '../components/agentquant/CentralCommandBar';
 import { CandlestickChart } from '../components/agentquant/CandlestickChart';
@@ -9,7 +10,6 @@ import { KPICards } from '../components/agentquant/KPICards';
 import { TradesList } from '../components/agentquant/TradesList';
 import { useChat } from '@ai-sdk/react';
 import { useTradingResults } from '../hooks/useTradingResults';
-import { WavyBackground } from '../components/ui/wavy-background';
 
 // Helper to extract function data from all assistant messages
 // Returns the last successful result, or the last result if no successful ones
@@ -64,7 +64,9 @@ export default function Home() {
   };
 
   return (
-    <WavyBackground>
+    <div className="min-h-screen bg-background text-foreground">
+      <BackgroundPattern />
+
       {/* Header */}
       <header className="relative z-10 px-6 py-8">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
@@ -143,6 +145,6 @@ export default function Home() {
       {/*  isCompleted={state.analysisCompleted}*/}
       {/*  isRefinedStrategy={state.isIteration}*/}
       {/*/>*/}
-    </WavyBackground>
+    </div>
   );
 }
