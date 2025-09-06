@@ -1,5 +1,6 @@
 import { Card } from '../ui/card';
 import { TrendingUp, TrendingDown, Shield, Target } from 'lucide-react';
+import Skeleton from 'react-loading-skeleton';
 
 // Performance Evaluation Thresholds
 // These constants define the business logic for evaluating trading strategy performance
@@ -122,14 +123,23 @@ interface PerformanceMetrics {
   total_trades: number;
 }
 
+interface AIAnalysis {
+  task_id?: string;
+  analysis?: string;
+  strategy_score?: number;
+  suggestions?: string;
+}
+
 interface KPICardsProps {
   isVisible?: boolean;
   performanceMetrics?: PerformanceMetrics;
+  aiAnalysis?: AIAnalysis;
 }
 
 export function KPICards({
   isVisible = true,
   performanceMetrics,
+  aiAnalysis,
 }: KPICardsProps) {
   if (!isVisible) return null;
 
@@ -302,22 +312,55 @@ export function KPICards({
         ))}
       </div>
 
-      {/* Strategy Summary */}
-      <Card className="mt-4 p-4 bg-primary/5 border-primary/20">
-        <div className="flex items-start space-x-3">
-          <div className="flex-shrink-0 w-2 h-2 bg-primary rounded-full mt-2"></div>
-          <div>
-            <h4 className="font-medium text-foreground mb-1">
-              Strategy Insight
-            </h4>
-            <p className="text-sm text-muted-foreground">
-              Strategy performance analysis based on historical backtesting
-              results. Metrics show risk-adjusted returns and trade execution
-              statistics.
-            </p>
+      {/* AI Strategy Analysis - Only show when we have real analysis */}
+      {aiAnalysis?.analysis ? (
+        <Card className="mt-4 p-4 bg-primary/5 border-primary/20">
+          <div className="flex items-start space-x-3">
+            <div className="flex-shrink-0 w-2 h-2 bg-primary rounded-full mt-2"></div>
+            <div className="flex-1">
+              <div className="flex items-center justify-between mb-2">
+                <h4 className="font-medium text-foreground">
+                  AI Strategy Analysis
+                </h4>
+                {aiAnalysis?.strategy_score !== undefined && (
+                  <div className="text-xs font-medium text-primary">
+                    Score: {aiAnalysis.strategy_score}/100
+                  </div>
+                )}
+              </div>
+
+              <p className="text-sm text-muted-foreground mb-3">
+                {aiAnalysis.analysis}
+              </p>
+
+              {aiAnalysis?.suggestions && (
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground mb-1">
+                    Optimization Suggestions:
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {aiAnalysis.suggestions}
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
-        </div>
-      </Card>
+        </Card>
+      ) : (
+        /* Skeleton for AI Analysis */
+        <Card className="mt-4 p-4 bg-primary/5 border-primary/20">
+          <div className="flex items-start space-x-3">
+            <div className="flex-shrink-0 w-2 h-2 bg-primary rounded-full mt-2"></div>
+            <div className="flex-1">
+              <Skeleton
+                count={9}
+                baseColor="#1f2937"
+                highlightColor="#374151"
+              />
+            </div>
+          </div>
+        </Card>
+      )}
     </div>
   );
 }

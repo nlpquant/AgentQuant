@@ -56,7 +56,60 @@ function parsePayload(payload: string): {
       result.output = JSON.parse(sanitizedString);
     } catch (e) {
       console.warn('Could not parse Function Output as JSON:', outputMatch[1]);
-      result.output = outputMatch[1];
+
+      // Try to extract JSON from ChatResponseChunk format
+      try {
+        // Look for content='...' pattern (original format)
+        let chunkMatch = outputMatch[1].match(/content='([^']+)'/);
+        if (chunkMatch && chunkMatch[1]) {
+          const jsonContent = chunkMatch[1].replace(/\\"/g, '"');
+          result.output = JSON.parse(jsonContent);
+          console.log(
+            'Successfully parsed JSON from ChatResponseChunk (quoted):',
+            result.output
+          );
+        } else {
+          // Look for content="..." pattern (double quotes)
+          chunkMatch = outputMatch[1].match(/content="([^"]+)"/);
+          if (chunkMatch && chunkMatch[1]) {
+            const jsonContent = chunkMatch[1].replace(/\\"/g, '"');
+            result.output = JSON.parse(jsonContent);
+            console.log(
+              'Successfully parsed JSON from ChatResponseChunk (double-quoted):',
+              result.output
+            );
+          } else {
+            // Look for content field with JSON content directly
+            chunkMatch = outputMatch[1].match(/content='({\s*[\s\S]*?\s*})'/);
+            if (chunkMatch && chunkMatch[1]) {
+              result.output = JSON.parse(chunkMatch[1]);
+              console.log(
+                'Successfully parsed JSON from ChatResponseChunk (JSON block):',
+                result.output
+              );
+            } else {
+              // Try to extract the entire JSON block that might be in the content
+              const jsonBlockMatch =
+                outputMatch[1].match(/({\s*"[\s\S]*?\s*})/);
+              if (jsonBlockMatch && jsonBlockMatch[1]) {
+                result.output = JSON.parse(jsonBlockMatch[1]);
+                console.log(
+                  'Successfully parsed JSON block from ChatResponseChunk:',
+                  result.output
+                );
+              } else {
+                result.output = outputMatch[1];
+              }
+            }
+          }
+        }
+      } catch (innerError) {
+        console.warn(
+          'Failed to parse ChatResponseChunk format as well:',
+          innerError
+        );
+        result.output = outputMatch[1];
+      }
     }
   }
 

@@ -55,6 +55,9 @@ export default function Home() {
   const executorData = extractFunctionData(messages, 'code_executor');
   const performanceMetrics = executorData?.output?.kpis;
 
+  // Extract AI analysis from workflow completion
+  const aiAnalysis = extractFunctionData(messages, '<workflow>');
+
   // Derive UI state from messages
   const isAnalyzing = status === 'submitted' || status === 'streaming';
   const isAnalysisCompleted = !!preview && !isAnalyzing;
@@ -123,6 +126,7 @@ export default function Home() {
                     <KPICards
                       isVisible={!!performanceMetrics}
                       performanceMetrics={performanceMetrics}
+                      aiAnalysis={aiAnalysis}
                     />
                   </div>
                 </div>
