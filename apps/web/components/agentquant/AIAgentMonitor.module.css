@@ -1,0 +1,36 @@
+.container {
+    position: fixed;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    width: 20rem;
+    z-index: 50;
+    transform: translateX(0);
+    transition: transform 500ms ease-in-out;
+}
+
+.container.collapsed {
+    transform: translateX(100%);
+}
+
+.toggleButton {
+    position: absolute;
+    top: 50%;
+    left: -1rem;
+    transform: translateY(-50%);
+    height: 2rem;
+    width: 2rem;
+    border-radius: 9999px;
+    border: 1px solid #4b5563;
+    background-color: #1f2937;
+    color: #d1d5db;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 150ms;
+}
+
+.toggleButton:hover {
+    background-color: #374151;
+}

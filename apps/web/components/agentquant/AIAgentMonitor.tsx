@@ -11,7 +11,11 @@ import {
   Loader2,
   FileText,
   Zap,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
+import styles from './AIAgentMonitor.module.css';
+import { cn } from '../ui/utils';
 
 interface Agent {
   id: string;
@@ -124,6 +128,7 @@ export function AIAgentMonitor({
   isRefinedStrategy = false,
 }: AIAgentMonitorProps) {
   const [currentAgents, setCurrentAgents] = useState(agents);
+  const [isCollapsed, setIsCollapsed] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
 
   useEffect(() => {
@@ -222,8 +227,15 @@ export function AIAgentMonitor({
   };
 
   return (
-    <div className="fixed bottom-6 right-6 w-80 z-50 animate-in slide-in-from-right-full duration-500">
+    <div className={cn(styles.container, { [styles.collapsed]: isCollapsed })}>
       <Card className="bg-card/95 backdrop-blur-sm border-border shadow-2xl">
+        <button
+          onClick={() => setIsCollapsed(!isCollapsed)}
+          className={styles.toggleButton}
+          aria-label={isCollapsed ? 'Expand panel' : 'Collapse panel'}
+        >
+          {isCollapsed ? <ChevronLeft /> : <ChevronRight />}
+        </button>
         <div className="p-4">
           {/* Header */}
           <div className="flex items-center justify-between mb-4">

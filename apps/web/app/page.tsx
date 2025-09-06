@@ -10,6 +10,7 @@ import { KPICards } from '../components/agentquant/KPICards';
 import { TradesList } from '../components/agentquant/TradesList';
 import { useChat } from '@ai-sdk/react';
 import { useTradingResults } from '../hooks/useTradingResults';
+import { AIAgentMonitor } from '../components/agentquant/AIAgentMonitor';
 
 // Helper to extract function data from all assistant messages
 // Returns the last successful result, or the last result if no successful ones
@@ -140,11 +141,10 @@ export default function Home() {
       </main>
 
       {/* AI Agent Monitor - Appears during and after analysis */}
-      {/*<AIAgentMonitor*/}
-      {/*  isVisible={state.isAnalyzing || state.analysisCompleted}*/}
-      {/*  isCompleted={state.analysisCompleted}*/}
-      {/*  isRefinedStrategy={state.isIteration}*/}
-      {/*/>*/}
+      <AIAgentMonitor
+        isVisible={isAnalyzing || isAnalysisCompleted}
+        isCompleted={isAnalysisCompleted}
+      />
     </div>
   );
 }
