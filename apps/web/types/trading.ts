@@ -15,7 +15,7 @@ export interface Trade {
   status: 'open' | 'closed'; // Added by API transformation
   trade_type: 'long' | 'short'; // Added by API transformation (defaults to 'long')
   // Optional fields
-  price?: number;
+  entry_price?: number;
   exit_price?: number;
   pnl_pct?: number;
 }
