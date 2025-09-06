@@ -46,38 +46,34 @@ function TradesTable({ trades }: { trades: Trade[] }) {
       {trades.slice(0, 10).map((trade, index) => (
         <Card key={index} className="p-4 border-l-4 border-l-primary/30">
           <div className="flex justify-between items-start">
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-2">
-                <Badge
-                  variant={
-                    trade.trade_type === 'long' ? 'default' : 'secondary'
-                  }
-                  className="text-xs"
-                >
-                  {trade.trade_type.toUpperCase()}
-                </Badge>
-                <Badge
-                  variant={trade.status === 'closed' ? 'outline' : 'secondary'}
-                  className="text-xs"
-                >
-                  {trade.status.toUpperCase()}
-                </Badge>
-              </div>
+            <div className="flex items-center gap-2 mb-2">
+              <Badge
+                variant={trade.trade_type === 'long' ? 'default' : 'secondary'}
+                className="text-xs"
+              >
+                {trade.trade_type.toUpperCase()}
+              </Badge>
+              <Badge
+                variant={trade.status === 'closed' ? 'outline' : 'secondary'}
+                className="text-xs"
+              >
+                {trade.status.toUpperCase()}
+              </Badge>
+            </div>
 
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div>
-                  <div className="flex items-center gap-1 text-muted-foreground mb-1">
-                    <Calendar className="h-3 w-3" />
-                    <span>Entry</span>
-                  </div>
-                  <div className="font-medium">
-                    {formatDate(trade.entry_date)}
-                  </div>
-                  <div className="text-muted-foreground">
-                    {trade.entry_price
-                      ? formatCurrency(trade.entry_price)
-                      : 'N/A'}
-                  </div>
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div>
+                <div className="flex items-center gap-1 text-muted-foreground mb-1">
+                  <Calendar className="h-3 w-3" />
+                  <span>Entry</span>
+                </div>
+                <div className="font-medium">
+                  {formatDate(trade.entry_date)}
+                </div>
+                <div className="text-muted-foreground">
+                  {trade.entry_price
+                    ? formatCurrency(trade.entry_price)
+                    : 'N/A'}
                 </div>
 
                 {trade.exit_date && (
@@ -97,34 +93,34 @@ function TradesTable({ trades }: { trades: Trade[] }) {
                   </div>
                 )}
               </div>
-            </div>
 
-            {trade.pnl !== undefined && (
-              <div className="text-right">
-                <div className="flex items-center gap-1 mb-1">
-                  <DollarSign className="h-3 w-3" />
-                  <span className="text-xs text-muted-foreground">P&L</span>
-                </div>
-                <div
-                  className={`font-semibold ${
-                    trade.pnl >= 0 ? 'text-green-600' : 'text-red-600'
-                  }`}
-                >
-                  {trade.pnl >= 0 ? '+' : ''}
-                  {formatCurrency(trade.pnl)}
-                </div>
-                {trade.pnl_pct !== undefined && (
+              {trade.pnl !== undefined && (
+                <div className="text-right">
+                  <div className="flex items-center gap-1 mb-1">
+                    <DollarSign className="h-3 w-3" />
+                    <span className="text-xs text-muted-foreground">P&L</span>
+                  </div>
                   <div
-                    className={`text-xs ${
-                      trade.pnl_pct >= 0 ? 'text-green-600' : 'text-red-600'
+                    className={`font-semibold ${
+                      trade.pnl >= 0 ? 'text-green-600' : 'text-red-600'
                     }`}
                   >
-                    ({trade.pnl_pct >= 0 ? '+' : ''}
-                    {trade.pnl_pct.toFixed(2)}%)
+                    {trade.pnl >= 0 ? '+' : ''}
+                    {formatCurrency(trade.pnl)}
                   </div>
-                )}
-              </div>
-            )}
+                  {trade.pnl_pct !== undefined && (
+                    <div
+                      className={`text-xs ${
+                        trade.pnl_pct >= 0 ? 'text-green-600' : 'text-red-600'
+                      }`}
+                    >
+                      ({trade.pnl_pct >= 0 ? '+' : ''}
+                      {trade.pnl_pct.toFixed(2)}%)
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
         </Card>
       ))}

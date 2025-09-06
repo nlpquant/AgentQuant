@@ -123,7 +123,7 @@ export function TradesList({
                     </Badge>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div className="flex gap-4 text-sm justify-between items-start">
                     <div>
                       <div className="flex items-center gap-1 text-muted-foreground mb-1">
                         <Calendar className="h-3 w-3" />
@@ -151,35 +151,37 @@ export function TradesList({
                         </div>
                       </div>
                     )}
-                  </div>
-                </div>
 
-                {trade.pnl !== undefined && (
-                  <div className="text-right">
-                    <div className="flex items-center gap-1 mb-1">
-                      <DollarSign className="h-3 w-3" />
-                      <span className="text-xs text-muted-foreground">P&L</span>
-                    </div>
-                    <div
-                      className={`font-semibold ${
-                        trade.pnl >= 0 ? 'text-green-600' : 'text-red-600'
-                      }`}
-                    >
-                      {trade.pnl >= 0 ? '+' : ''}
-                      {formatCurrency(trade.pnl)}
-                    </div>
-                    {trade.pnl_pct !== undefined && (
-                      <div
-                        className={`text-xs ${
-                          trade.pnl_pct >= 0 ? 'text-green-600' : 'text-red-600'
-                        }`}
-                      >
-                        ({trade.pnl_pct >= 0 ? '+' : ''}
-                        {trade.pnl_pct.toFixed(2)}%)
+                    {trade.pnl !== undefined && (
+                      <div className="text-right">
+                        <div className="flex items-center gap-1 mb-1 justify-self-end">
+                          <DollarSign className="h-3 w-3" />
+                          <span className="text-muted-foreground">P&L</span>
+                        </div>
+                        <div
+                          className={`font-semibold ${
+                            trade.pnl >= 0 ? 'text-green-600' : 'text-red-600'
+                          }`}
+                        >
+                          {trade.pnl >= 0 ? '+' : ''}
+                          {formatCurrency(trade.pnl)}
+                        </div>
+                        {trade.pnl_pct !== undefined && (
+                          <div
+                            className={`text-xs ${
+                              trade.pnl_pct >= 0
+                                ? 'text-green-600'
+                                : 'text-red-600'
+                            }`}
+                          >
+                            ({trade.pnl_pct >= 0 ? '+' : ''}
+                            {trade.pnl_pct.toFixed(2)}%)
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
-                )}
+                </div>
               </div>
             </Card>
           );
