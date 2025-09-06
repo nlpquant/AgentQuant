@@ -203,8 +203,6 @@ export function CandlestickChart({
 
     window.addEventListener('resize', handleResize);
 
-    console.log('Page Render Done');
-
     const readyTimer = setTimeout(() => {
       setChartReady(true);
     }, 0);

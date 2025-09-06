@@ -61,11 +61,6 @@ function findSignalPrice(
     return closestSignal.price;
   }
 
-  // Debug logging
-  console.log(
-    `No close signal found for trade date: ${date}, closest was ${minDifference / 86400000} days away`
-  );
-
   return null;
 }
 
@@ -102,12 +97,6 @@ export function TradesList({
 
       <div className="space-y-3 max-h-96 overflow-y-auto">
         {trades.slice(0, 10).map((trade, index) => {
-          // Debug logging
-          if (index === 0) {
-            console.log('First trade:', trade);
-            console.log('First few signals:', signals?.slice(0, 3));
-          }
-
           const entryPrice = findSignalPrice(trade.entry_date, signals || []);
           const exitPrice = trade.exit_date
             ? findSignalPrice(trade.exit_date, signals || [])
