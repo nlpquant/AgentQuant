@@ -1,8 +1,9 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { SMA, RSI, BollingerBands } from 'technicalindicators';
 import { createChart, CandlestickSeries, LineSeries } from 'lightweight-charts';
 import { useQuery, QueryFunctionContext } from '@tanstack/react-query';
 import Skeleton from 'react-loading-skeleton';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface CandlestickChartProps {
   preview: any;
@@ -128,9 +129,13 @@ export function CandlestickChart({
     enabled: !!storageKey,
   });
   const chartContainerRef = useRef<HTMLDivElement>(null);
+  const [isChartReady, setChartReady] = useState(false);
 
   useEffect(() => {
     if (!data || !chartContainerRef.current) return;
+
+    setChartReady(false);
+
     const handleResize = () => {
       chart.applyOptions({ width: chartContainerRef.current?.clientWidth });
     };
@@ -158,8 +163,6 @@ export function CandlestickChart({
         borderColor: chartColors.grid,
       },
     });
-
-    // chart.timeScale().fitContent();
 
     const newSeries = chart.addSeries(CandlestickSeries);
     newSeries.setData(data.data);
@@ -200,43 +203,68 @@ export function CandlestickChart({
 
     window.addEventListener('resize', handleResize);
 
+    console.log('Page Render Done');
+
+    const readyTimer = setTimeout(() => {
+      setChartReady(true);
+    }, 0);
+
     return () => {
+      clearTimeout(readyTimer);
       window.removeEventListener('resize', handleResize);
 
       chart.remove();
     };
-  }, [data, preview?.ticker, preview?.time_frame, preview?.indicators]);
+  }, [data, preview]);
 
   // Show loading state only when we don't have the required data
-  const showLoading = !data || !preview || isLoading;
-
-  if (showLoading) {
-    return (
-      <Skeleton
-        height={500}
-        borderRadius="1rem"
-        baseColor="#101827"
-        customHighlightBackground="linear-gradient(135deg, transparent 5%, var(--base-color) 35%, #2e589e 50%, var(--base-color) 65%, transparent 95%)"
-      />
-    );
-  }
+  const showLoading = !preview || isLoading || !isChartReady;
 
   return (
-    <div style={{ position: 'relative' }}>
-      <div ref={chartContainerRef} style={{ position: 'relative' }}>
-        {/* React-rendered legend */}
-        <div
-          className="absolute z-10 text-sm text-white font-light pointer-events-none"
-          style={{
-            left: '12px',
-            top: '12px',
-            fontFamily: 'sans-serif',
-            lineHeight: '18px',
-            fontWeight: 300,
-          }}
-        >
-          {preview?.ticker} {preview?.time_frame?.toUpperCase()}
-        </div>
+    <div style={{ position: 'relative', height: '500px' }}>
+      <AnimatePresence>
+        {showLoading && (
+          <motion.div
+            key="skeleton"
+            initial={{ opacity: 1 }}
+            // animate={{ opacity: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+            }}
+          >
+            <Skeleton
+              height={500}
+              borderRadius="1rem"
+              baseColor="#101827"
+              customHighlightBackground="linear-gradient(135deg, transparent 5%, var(--base-color) 35%, #2e589e 50%, var(--base-color) 65%, transparent 95%)"
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <div
+        ref={chartContainerRef}
+        style={{
+          position: 'relative',
+          height: '100%',
+          visibility: showLoading ? 'hidden' : 'visible',
+          transition: 'visibility 0s linear 0.4s', // 确保在 skeleton 消失后才可见
+        }}
+      >
+        {!showLoading && preview && (
+          <div
+            className="absolute z-10 text-sm text-white font-light pointer-events-none"
+            style={{ left: '12px', top: '12px' }}
+          >
+            {preview.ticker} {preview.time_frame?.toUpperCase()}
+          </div>
+        )}
       </div>
     </div>
   );
