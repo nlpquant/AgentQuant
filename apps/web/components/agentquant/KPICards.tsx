@@ -329,16 +329,16 @@ export function KPICards({
                 )}
               </div>
 
-              <p className="text-sm text-muted-foreground mb-3">
+              <p className="text-base text-foreground mb-4 leading-relaxed">
                 {aiAnalysis.analysis}
               </p>
 
               {aiAnalysis?.suggestions && (
-                <div>
-                  <p className="text-xs font-medium text-muted-foreground mb-1">
+                <div className="border-t border-border pt-3 mt-4">
+                  <p className="text-sm font-medium text-foreground mb-2">
                     Optimization Suggestions:
                   </p>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-base text-muted-foreground leading-relaxed">
                     {aiAnalysis.suggestions}
                   </p>
                 </div>
