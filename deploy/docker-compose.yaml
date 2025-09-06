@@ -1,4 +1,27 @@
 services:
+  mcp-server:
+    build: ../apps/mcp-server
+    container_name: agentquant-mcp-server
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    networks:
+      - agentquant-network
+    environment:
+      REDIS_URL: redis://redis:6379
+      K8S_CONFIG_FILE: /kube/kubeconfig.yaml
+      K8S_SERVER_ENDPOINT: https://host.docker.internal:6444
+      JOB_RUNNER_IMAGE: docker.io/go2sheep/code-runner:python-3.12
+      JOB_REDIS_HOST: host.docker.internal
+      JOB_REDIS_PORT: "6379"
+    volumes:
+      - kubeconfig:/kube
+    depends_on:
+      kind:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
   kind:
     build: ./kind
     container_name: agentquant-kind
@@ -7,29 +30,27 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./kind:/kind-config
       - kind_data:/kind
+      - kubeconfig:/kube
     command: >
       sh -c "
+        set -ex;
         if ! kind get clusters | grep -q 'my-cluster'; then
           echo 'Cluster my-cluster not found, creating it...';
           kind create cluster --name my-cluster --config /kind-config/kind-config.yaml;
         else
           echo 'Cluster my-cluster already exists.';
         fi;
-        kind get kubeconfig --name my-cluster > /kind-config/kubeconfig.yaml
+        kind get kubeconfig --name my-cluster > /kube/kubeconfig.yaml;
+        rm /kind-config/kubeconfig.yaml;
+        cp /kube/kubeconfig.yaml /kind-config/kubeconfig.yaml;
         # Keep the container running
         tail -f /dev/null;
       "
-
-  # mcp-server:
-  #   build: ../apps/mcp-server
-  #   container_name: agentquant-mcp-server
-  #   restart: unless-stopped
-  #   ports:
-  #     - "8080:8080"
-  #   networks:
-  #     - agentquant-network
-  #   environment:
-  #     REDIS_URL: redis://redis:6379
+    healthcheck:
+      test: ["CMD", "kubectl", "version", "--kubeconfig=/kube/kubeconfig.yaml", "-s", "https://host.docker.internal:6444"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   mcp-inspector:
     image: ghcr.io/modelcontextprotocol/inspector:latest
@@ -43,6 +64,8 @@ services:
     environment:
       DANGEROUSLY_OMIT_AUTH: "true"
       HOST: 0.0.0.0
+    profiles:
+      - development
 
   redis:
     image: redis:7-alpine
@@ -68,7 +91,6 @@ services:
     environment:
       RI_REDIS_HOST: redis
       RI_REDIS_PORT: 6379
-
     ports:
       - "5540:5540"
     depends_on:
@@ -76,11 +98,15 @@ services:
         condition: service_healthy
     networks:
       - agentquant-network
+    profiles:
+      - development
 
 volumes:
   redis_data:
     driver: local
   kind_data:
+    driver: local
+  kubeconfig:
     driver: local
 
 networks:

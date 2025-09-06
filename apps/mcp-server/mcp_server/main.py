@@ -1,21 +1,18 @@
 import json
 import uuid
 from fastapi import FastAPI
-from datetime import datetime
-import pandas as pd
-import yfinance as yf
+
 
 from mcp_server.generator import (
-    generate_execution_code,
     generate_execution_with_data_code,
     generate_strategy_code,
 )
-from mcp_server.k8s import create_job, init_k8s_client, watch_job
+from mcp_server import k8s
 from mcp_server.logging import AppLogger
 from mcp_server.redis import init_redis_pool
 from mcp_server.sse import create_sse_server
 from mcp.server.fastmcp import FastMCP
-from mcp_server.models import OHLCVData, TaskEntry
+from mcp_server.models import TaskEntry
 from mcp_server.config import settings as global_settings
 from mcp_server.ticker import (
     ohlcv_to_redis,
@@ -29,7 +26,7 @@ from mcp_server.utils import compact_json_tool, safe_parse_logs
 logger = AppLogger().get_logger()
 api = FastAPI(logger=logger)
 mcp = FastMCP("Server")
-init_k8s_client(logger=logger)
+k8s.init_k8s_client(logger=logger)
 
 
 @api.on_event("startup")
@@ -152,8 +149,8 @@ async def code_executor(task_id: str) -> dict:
             strategy_code=strategy_code,
             initial_cash=100000.0,
         )
-        job = create_job(task_id, storage_key, execution_code, logger=logger)
-        result = watch_job(job, timeout=global_settings.job_runner_timeout)
+        job = k8s.create_job(task_id, storage_key, execution_code, logger=logger)
+        result = k8s.watch_job(job, timeout=global_settings.job_runner_timeout)
         if result["success"]:
             try:
                 logs_json = safe_parse_logs(result["logs"])
@@ -228,4 +225,15 @@ async def get_data(task_id: str):
             return {"error": "Task result not found"}, 404
     except Exception as e:
         logger.error(f"Failed to query Redis: {e}")
+        return {"error": str(e)}, 500
+
+
+@api.get("/jobs")
+async def list_jobs():
+    """List all jobs."""
+    try:
+        jobs = k8s.list_jobs()
+        return {"jobs": jobs}
+    except Exception as e:
+        logger.error(f"Failed to list jobs: {e}")
         return {"error": str(e)}, 500

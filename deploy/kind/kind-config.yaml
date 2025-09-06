@@ -18,3 +18,17 @@ nodes:
   # - containerPort: 443
   #   hostPort: 8443 # Expose Ingress on host port 8443
   #   protocol: TCP
+
+kubeadmConfigPatches:
+  - |
+    kind: ClusterConfiguration
+    apiServer:
+      certSANs:
+        - "localhost"
+        - "127.0.0.1"
+        - "0.0.0.0"
+        - "kubernetes"
+        - "kubernetes.default"
+        - "kubernetes.default.svc"
+        - "kubernetes.default.svc.cluster.local"
+        - "host.docker.internal"

@@ -6,10 +6,18 @@ from mcp_server.config import settings as global_settings
 
 def init_k8s_client(logger: Logger):
     try:
-        config.load_kube_config(config_file=global_settings.k8s_config_file)
+        cfg = client.Configuration()
+        config.load_kube_config(config_file=global_settings.k8s_config_file, client_configuration=cfg)
+        if global_settings.k8s_server_endpoint:
+            cfg.host = global_settings.k8s_server_endpoint
+            logger.info(f"Using custom K8s server endpoint: {cfg.host}")
+        client.Configuration.set_default(cfg)
         logger.info("K8s config loaded successfully.")
+        version = client.VersionApi().get_code()
+        logger.info(f"K8s version: {version.git_version}")
     except Exception as e:
-        logger.error(f"Error loading K8s config: {e}")
+        logger.fatal(f"Error loading K8s config: {e}")
+        exit(1)
 
 
 def create_job(task_id: str, storage_key: str, code: str, logger: Logger):
@@ -43,7 +51,7 @@ def create_job(task_id: str, storage_key: str, code: str, logger: Logger):
                             "set -e;",
                             "echo 'Fetching data from Redis...'",
                             f"redis-cli -h {global_settings.job_redis_host} -p {global_settings.job_redis_port} -n {global_settings.job_redis_db} get {storage_key} > /mnt/data/output.json;",
-                            "echo 'Data fetched successfully.'"
+                            "echo 'Data fetched successfully.'",
                         ]
                     ),
                 ],
@@ -138,3 +146,16 @@ def watch_job(job_metadata, timeout):
         if time() - start_time > timeout:
             return {"success": False, "message": "Job timed out"}
         sleep(1)
+
+
+def list_jobs():
+    batch_v1 = client.BatchV1Api()
+    jobs = batch_v1.list_namespaced_job(namespace=global_settings.job_namespace)
+    return [
+        {
+            "name": job.metadata.name,
+            "namespace": job.metadata.namespace,
+            "status": job.status,
+        }
+        for job in jobs.items
+    ]

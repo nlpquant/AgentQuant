@@ -11,6 +11,7 @@ class Settings(BaseSettings):
     data_expire: int = int(os.getenv("DATA_EXPIRE", "43200"))  # 12 hours
 
     k8s_config_file: str = os.getenv("K8S_CONFIG_FILE", "../../deploy/kind/kubeconfig.yaml")
+    k8s_server_endpoint: str = os.getenv("K8S_SERVER_ENDPOINT", "")
     job_namespace: str = os.getenv("JOB_NAMESPACE", "default")
     job_redis_image: str = os.getenv("JOB_REDIS_IMAGE", "redis:alpine3.22")
     job_redis_host: str = os.getenv("JOB_REDIS_HOST", "host.docker.internal")
