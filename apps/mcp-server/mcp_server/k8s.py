@@ -7,7 +7,9 @@ from mcp_server.config import settings as global_settings
 def init_k8s_client(logger: Logger):
     try:
         cfg = client.Configuration()
-        config.load_kube_config(config_file=global_settings.k8s_config_file, client_configuration=cfg)
+        config.load_kube_config(
+            config_file=global_settings.k8s_config_file, client_configuration=cfg
+        )
         if global_settings.k8s_server_endpoint:
             cfg.host = global_settings.k8s_server_endpoint
             logger.info(f"Using custom K8s server endpoint: {cfg.host}")
@@ -151,11 +153,36 @@ def watch_job(job_metadata, timeout):
 def list_jobs():
     batch_v1 = client.BatchV1Api()
     jobs = batch_v1.list_namespaced_job(namespace=global_settings.job_namespace)
-    return [
-        {
+    jobs_list = []
+
+    for job in jobs.items:
+        job_state = {
             "name": job.metadata.name,
             "namespace": job.metadata.namespace,
-            "status": job.status,
         }
-        for job in jobs.items
-    ]
+
+        if job.status:
+            # Access attributes directly; they can be None
+            job_state["start_time"] = getattr(job.status, "start_time", None)
+            job_state["completion_time"] = getattr(job.status, "completion_time", None)
+
+            # conditions is usually a list of V1JobCondition objects
+            if getattr(job.status, "conditions", None):
+                job_state["conditions"] = [
+                    {
+                        "type": cond.type,
+                        "status": cond.status,
+                        "reason": getattr(cond, "reason", None),
+                        "message": getattr(cond, "message", None),
+                        "last_transition_time": getattr(
+                            cond, "last_transition_time", None
+                        ),
+                    }
+                    for cond in job.status.conditions
+                ]
+            else:
+                job_state["conditions"] = []
+
+        jobs_list.append(job_state)
+
+    return jobs_list

@@ -195,6 +195,11 @@ def read_root():
     return {"message": "Welcome! The agent is available at the /mcp/sse endpoint."}
 
 
+@api.get("/health")
+def health_check():
+    return {"status": "healthy"}
+
+
 @api.get("/data/{storage_key}")
 async def get_data(storage_key: str):
     """Fetch data from Redis by storage key."""
@@ -229,11 +234,10 @@ async def get_data(task_id: str):
 
 
 @api.get("/jobs")
-async def list_jobs():
+def list_jobs():
     """List all jobs."""
     try:
-        jobs = k8s.list_jobs()
-        return {"jobs": jobs}
+        return {"jobs": k8s.list_jobs()}
+
     except Exception as e:
-        logger.error(f"Failed to list jobs: {e}")
         return {"error": str(e)}, 500
