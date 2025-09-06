@@ -17,6 +17,7 @@ docker-compose ps
 docker inspect agentquant-redis --format='{{json .State.Health}}' | jq
 docker inspect agentquant-mcp-server --format='{{json .State.Health}}' | jq
 docker inspect agentquant-agent --format='{{json .State.Health}}' | jq
+docker inspect agentquant-kind --format='{{json .State.Health}}' | jq
 ```
 
 ## Restart the service when code changes
