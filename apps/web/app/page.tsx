@@ -104,8 +104,10 @@ export default function Home() {
                 />
               </div>
 
-              {/* KPI Cards and Trades - Only show when analysis is completed */}
-              {isAnalysisCompleted && (
+              {/* KPI Cards and Trades - Show when data is available */}
+              {(executorData ||
+                performanceMetrics ||
+                tradingResults?.trades) && (
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                   {/* Trades column */}
                   <div className="lg:col-span-2">
@@ -119,7 +121,7 @@ export default function Home() {
                   {/* KPI Cards column */}
                   <div className="lg:col-span-1">
                     <KPICards
-                      isVisible={true}
+                      isVisible={!!performanceMetrics}
                       performanceMetrics={performanceMetrics}
                     />
                   </div>

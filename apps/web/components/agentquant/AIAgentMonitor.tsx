@@ -319,7 +319,8 @@ export function AIAgentMonitor({
               </h3>
             </div>
             <div className="text-xs text-muted-foreground">
-              Step {Math.min(currentStep + 1, currentAgents.length)}/{currentAgents.length}
+              Step {Math.min(currentStep + 1, currentAgents.length)}/
+              {currentAgents.length}
             </div>
           </div>
 
