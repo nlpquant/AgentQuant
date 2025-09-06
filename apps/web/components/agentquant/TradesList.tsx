@@ -2,6 +2,7 @@ import { Card } from '../ui/card';
 import { Badge } from '../ui/badge';
 import { Trade, TradingSignal } from '../../types/trading';
 import { Activity, Calendar, DollarSign } from 'lucide-react';
+import { useEffect, useRef } from 'react';
 
 interface TradesListProps {
   trades: Trade[];
@@ -73,12 +74,24 @@ export function TradesList({
   signals,
   isVisible = true,
 }: TradesListProps) {
-  if (!isVisible || !trades || trades.length === 0) {
+  const tradesRef = useRef<HTMLDivElement>(null);
+  const shouldDisplay = isVisible && trades && trades.length > 0;
+
+  useEffect(() => {
+    if (shouldDisplay && tradesRef.current) {
+      tradesRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+    }
+  }, [shouldDisplay]);
+
+  if (!shouldDisplay) {
     return null;
   }
 
   return (
-    <Card className="p-6">
+    <Card className="p-6" ref={tradesRef}>
       <div className="flex items-center gap-2 mb-4">
         <Activity className="h-5 w-5 text-primary" />
         <h3 className="text-lg font-semibold">Recent Trades</h3>
