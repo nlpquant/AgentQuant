@@ -4,36 +4,36 @@ general:
 functions:
   task_register:
     _type: mcp_tool_wrapper
-    url: "http://localhost:8080/mcp/sse"
+    url: ${MCP_SERVER_ENDPOINT:-"http://localhost:8080/mcp/sse"}
     mcp_tool_name: task_register
   quick_preview:
     _type: quick_preview
-    llm_name: qwen3_flash
+    llm_name: llm_generic
     description: "Provide a quick preview based on the user_prompt, return details if succeeded."
   yh_query_save:
     _type: mcp_tool_wrapper
-    url: "http://localhost:8080/mcp/sse"
+    url: ${MCP_SERVER_ENDPOINT:-"http://localhost:8080/mcp/sse"}
     mcp_tool_name: yh_query_save
   code_generator:
     _type: code_generator
-    llm_name: qwen3_coder
+    llm_name: llm_coder
     description: "Generate code based on the user prompt."
   code_executor:
     _type: mcp_tool_wrapper
-    url: "http://localhost:8080/mcp/sse"
+    url: ${MCP_SERVER_ENDPOINT:-"http://localhost:8080/mcp/sse"}
     mcp_tool_name: code_executor
 
 llms:
-  qwen3_flash:
+  llm_generic:
     _type: openai
-    model_name: "qwen-plus"
+    model_name: ${LLM_GENERIC_MODEL_NAME:-"qwen-plus"}
     # api_key: "..." # read from env OPENAI_API_KEY
     base_url: "https://dashscope.aliyuncs.com/compatible-mode/v1"
     temperature: 1
     max_tokens: 3000
-  qwen3_coder:
+  llm_coder:
     _type: openai
-    model_name: "qwen3-coder-plus"
+    model_name: ${LLM_CODER_MODEL_NAME:-"qwen3-coder-plus"}
     # api_key: "..." # read from env OPENAI_API_KEY
     base_url: "https://dashscope.aliyuncs.com/compatible-mode/v1"
     temperature: 1
@@ -41,7 +41,7 @@ llms:
 
 workflow:
   _type: react_agent
-  llm_name: qwen3_flash
+  llm_name: llm_generic
   verbose: true
   parse_agent_response_max_retries: 3
   recursion_limit: 1
@@ -123,7 +123,11 @@ workflow:
     5.2 After getting result from code_generator, the data format will be as below:
         {{
             "task_id": "string",
-            "status": "success"
+            "status": "success",
+            "logic_summary": {{
+              "entry_conditions": ["..."],
+              "exit_conditions": ["..."]
+            }}
         }}
     6. You MUST call code_executor tool LAST, after calling code_generator and before giving the final answer
     6.1 When calling code_executor, you MUST use the exact format as below,

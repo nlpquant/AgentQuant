@@ -1,4 +1,31 @@
 services:
+  agent:
+    build:
+      context: ../apps
+      dockerfile: agent/Dockerfile
+    container_name: agentquant-agent
+    restart: always
+    ports:
+      - 8000:8000
+    networks:
+      - agentquant-network
+    environment:
+      NAT_RELOAD_ENABLED: "false"
+      MCP_SERVER_ENDPOINT: http://mcp-server:8080/mcp/sse
+      LLM_GENERIC_MODEL_NAME: ${LLM_GENERIC_MODEL_NAME:-"qwen3-plus"}
+      LLM_CODER_MODEL_NAME: ${LLM_CODER_MODEL_NAME:-"qwen3-coder-plus"}
+      OPENAI_API_KEY: "${OPENAI_API_KEY}"
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
+    healthcheck:
+      test: ["CMD", "curl", "-fs", "http://host.docker.internal:8000/docs"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    depends_on:
+      mcp-server:
+        condition: service_healthy
+
   mcp-server:
     build: ../apps/mcp-server
     container_name: agentquant-mcp-server
@@ -21,6 +48,11 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-fs", "http://host.docker.internal:8080/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   kind:
     build: ./kind
@@ -47,7 +79,15 @@ services:
         tail -f /dev/null;
       "
     healthcheck:
-      test: ["CMD", "kubectl", "version", "--kubeconfig=/kube/kubeconfig.yaml", "-s", "https://host.docker.internal:6444"]
+      test:
+        [
+          "CMD",
+          "kubectl",
+          "version",
+          "--kubeconfig=/kube/kubeconfig.yaml",
+          "-s",
+          "https://host.docker.internal:6444",
+        ]
       interval: 5s
       timeout: 5s
       retries: 5

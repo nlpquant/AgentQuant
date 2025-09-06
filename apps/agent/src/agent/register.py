@@ -20,30 +20,30 @@ print("Agent custom functions loaded.")
 logger = logging.getLogger(__name__)
 
 
-class ExampleConfig(FunctionBaseConfig, name="example"):
-    description: str = Field(description="Description of the example function.")
-    llm_name: LLMRef = Field(description="LLM to use for the example tool.")
+# class ExampleConfig(FunctionBaseConfig, name="example"):
+#     description: str = Field(description="Description of the example function.")
+#     llm_name: LLMRef = Field(description="LLM to use for the example tool.")
 
 
-@register_function(
-    config_type=ExampleConfig, framework_wrappers=[LLMFrameworkEnum.LANGCHAIN]
-)
-async def example(config: ExampleConfig, builder: Builder):
+# @register_function(
+#     config_type=ExampleConfig, framework_wrappers=[LLMFrameworkEnum.LANGCHAIN]
+# )
+# async def example(config: ExampleConfig, builder: Builder):
 
-    llm = await builder.get_llm(
-        config.llm_name, wrapper_type=LLMFrameworkEnum.LANGCHAIN
-    )
+#     llm = await builder.get_llm(
+#         config.llm_name, wrapper_type=LLMFrameworkEnum.LANGCHAIN
+#     )
 
-    async def _run(msg: str) -> str:
-        """
-        An example function that uses an LLM to summary a message.
-        """
-        prompt = summary_prompt.invoke({"documents": msg})
-        response = await llm.ainvoke(prompt)
+#     async def _run(msg: str) -> str:
+#         """
+#         An example function that uses an LLM to summary a message.
+#         """
+#         prompt = summary_prompt.invoke({"documents": msg})
+#         response = await llm.ainvoke(prompt)
 
-        return f"This is an example summary using LLM ({config.llm_name}): {response.content}"
+#         return f"This is an example summary using LLM ({config.llm_name}): {response.content}"
 
-    yield FunctionInfo.from_fn(_run, description=config.description)
+#     yield FunctionInfo.from_fn(_run, description=config.description, input_schema=CodeGeneratorInput)
 
 
 class QuickPreviewConfig(FunctionBaseConfig, name="quick_preview"):
@@ -51,6 +51,10 @@ class QuickPreviewConfig(FunctionBaseConfig, name="quick_preview"):
         description="Provide a quick preview based on the user_prompt, return details if succeeded."
     )
     llm_name: LLMRef = Field(description="LLM to use for the quick preview.")
+
+
+# class QuickPreviewInput(BaseModel):
+#     user_prompt: str
 
 
 @register_function(
@@ -75,12 +79,25 @@ async def quick_preview(config: QuickPreviewConfig, builder: Builder):
         response = await llm.ainvoke(prompt)
         return response.content
 
-    yield FunctionInfo.from_fn(_run, description=config.description)
+    yield FunctionInfo.from_fn(
+        _run,
+        description=config.description,
+        # input_schema=QuickPreviewInput
+    )
 
 
 class CodeGeneratorConfig(FunctionBaseConfig, name="code_generator"):
     description: str = Field(description="Generate code based on the user prompt.")
     llm_name: LLMRef = Field(description="LLM to use for the code generation.")
+
+
+# class CodeGeneratorInput(BaseModel):
+#     task_id: str
+#     user_prompt: str
+#     ticker: str
+#     start_date: str
+#     end_date: str
+#     time_frame: str
 
 
 @register_function(
@@ -102,7 +119,9 @@ async def code_generator(config: CodeGeneratorConfig, builder: Builder):
     ) -> dict:
         """
         A code generation function that uses an LLM to generate code based on the user_prompt, ticker, start_date, and end_date, then store the code into redis.
+
         """
+
         prompt = code_generator_prompt.invoke(
             {
                 "user_prompt": user_prompt,
@@ -144,4 +163,8 @@ async def code_generator(config: CodeGeneratorConfig, builder: Builder):
             "message": "Code generated successfully",
         }
 
-    yield FunctionInfo.from_fn(_run, description=config.description)
+    yield FunctionInfo.from_fn(
+        _run,
+        description=config.description,
+        # input_schema=CodeGeneratorInput,
+    )
