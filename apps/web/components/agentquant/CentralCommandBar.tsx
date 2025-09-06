@@ -36,7 +36,7 @@ export function CentralCommandBar({
 e.g., Backtest a Golden Cross strategy for TSLA using 10-day and 30-day moving averages.`;
 
   return (
-    <div className="w-full max-w-4xl mx-auto space-y-6">
+    <div className="w-full space-y-6">
       {/* Command Bar Header */}
       <div className="text-center space-y-2">
         <div className="flex items-center justify-center space-x-2 text-primary mb-2">
@@ -62,7 +62,7 @@ e.g., Backtest a Golden Cross strategy for TSLA using 10-day and 30-day moving a
             onChange={e => setQuery(e.target.value)}
             placeholder={placeholderText}
             disabled={isAnalyzing}
-            className="min-h-[120px] text-base bg-transparent border-0 resize-none focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground/70 disabled:cursor-not-allowed disabled:opacity-50"
+            className="min-h-[120px] text-lg font-mono tracking-wide bg-transparent border-0 resize-none focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground/70 disabled:cursor-not-allowed disabled:opacity-50 leading-relaxed"
           />
 
           <div className="flex items-center justify-between mt-4 pt-4 border-t border-border">
