@@ -352,8 +352,13 @@ export function KPICards({
           <div className="flex items-start space-x-3">
             <div className="flex-shrink-0 w-2 h-2 bg-primary rounded-full mt-2"></div>
             <div className="flex-1">
+              <div className="flex items-center justify-between mb-2">
+                <h4 className="font-medium text-foreground">
+                  AI Strategy Analysis
+                </h4>
+              </div>
               <Skeleton
-                count={9}
+                count={8}
                 baseColor="#1f2937"
                 highlightColor="#374151"
               />
