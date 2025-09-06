@@ -144,6 +144,7 @@ export default function Home() {
       <AIAgentMonitor
         isVisible={isAnalyzing || isAnalysisCompleted}
         isCompleted={isAnalysisCompleted}
+        messages={messages}
       />
     </div>
   );
