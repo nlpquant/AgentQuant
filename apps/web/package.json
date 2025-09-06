@@ -27,6 +27,7 @@
     "next": "^15.5.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "react-loading-skeleton": "^3.5.0",
     "recharts": "^3.1.2",
     "tailwind-merge": "^3.3.1",
     "technicalindicators": "^3.1.0"
