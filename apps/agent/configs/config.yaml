@@ -27,15 +27,15 @@ llms:
   llm_generic:
     _type: openai
     model_name: ${LLM_GENERIC_MODEL_NAME:-"qwen-plus"}
-    # api_key: "..." # read from env OPENAI_API_KEY
-    base_url: "https://dashscope.aliyuncs.com/compatible-mode/v1"
+    api_key: ${LLM_GENERIC_MODEL_API_KEY}
+    base_url: ${LLM_GENERIC_MODEL_API_ENDPOINT:-"https://dashscope.aliyuncs.com/compatible-mode/v1"}
     temperature: 1
     max_tokens: 3000
   llm_coder:
     _type: openai
     model_name: ${LLM_CODER_MODEL_NAME:-"qwen3-coder-plus"}
-    # api_key: "..." # read from env OPENAI_API_KEY
-    base_url: "https://dashscope.aliyuncs.com/compatible-mode/v1"
+    api_key: ${LLM_CODER_MODEL_API_KEY}
+    base_url: ${LLM_CODER_MODEL_API_ENDPOINT:-"https://dashscope.aliyuncs.com/compatible-mode/v1"}
     temperature: 1
     max_tokens: 10000
 
