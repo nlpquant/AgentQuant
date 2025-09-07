@@ -422,13 +422,13 @@ This project is licensed under the GNU Affero General Public License v3.0 (AGPL-
 - 📖 **Documentation**: [Wiki](https://github.com/nlpquant/AgentQuant/wiki)
 - 🐛 **Bug Reports**: [Issues](https://github.com/nlpquant/AgentQuant/issues)
 - 💬 **Discussions**: [GitHub Discussions](https://github.com/nlpquant/AgentQuant/discussions)
-- 📧 **Email**: support@agentquant.com
+- 📧 **Email**: support@nlpquant.ai
 
 ---
 
 <div align="center">
 
-**Built with ❤️ by the AgentQuant Team**
+**Built with ❤️ by the NLPQuant Team**
 
 [Website](https://nlpquant.ai/) • [GitHub](https://github.com/nlpquant/AgentQuant) • [Documentation](https://github.com/nlpquant/AgentQuant/wiki)
 
