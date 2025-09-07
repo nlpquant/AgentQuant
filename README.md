@@ -6,7 +6,7 @@
 
 *Transform natural language into sophisticated trading strategies with real-time backtesting and interactive visualization*
 
-[![Join Waitlist](https://img.shields.io/badge/Join-Waitlist-orange?style=for-the-badge&logo=mailchimp)](https://nlpquant.ai/)
+[![Join Waitlist](https://img.shields.io/badge/Join-Waitlist-orange?style=for-the-badge&logo=maildotru)](https://nlpquant.ai/)
 
 [![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL--3.0-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 [![Node.js](https://img.shields.io/badge/Node.js-18+-green.svg)](https://nodejs.org/)
@@ -120,13 +120,15 @@ sequenceDiagram
 
 ## 🚀 Quick Start
 
-### Prerequisites
+### 📋 Prerequisites
 
-- **Node.js** 18+ with `pnpm`
-- **Python** 3.12+ with `uv`
-- **Docker** & `Docker Compose`
-- **Redis** 7+ (included in Docker setup)
-- **OpenAI API Key** (or compatible LLM service)
+| Requirement | Version | Notes |
+|-------------|---------|-------|
+| **Node.js** | 18+ | With `pnpm` package manager |
+| **Python** | 3.12+ | With `uv` package manager |
+| **Docker** | Latest | & `Docker Compose` |
+| **Redis** | 7+ | *(Included in Docker setup)* |
+| **OpenAI API Key** | - | Or compatible LLM service |
 
 ### Option 1: Docker Compose (Recommended)
 
@@ -138,8 +140,8 @@ cd AgentQuant
 # Set up environment variables
 cd deploy
 export OPENAI_API_KEY='your-api-key-here'
-export LLM_GENERIC_MODEL_NAME='qwen-plus-2025-07-28'
-export LLM_CODER_MODEL_NAME='qwen3-coder-plus'
+export LLM_GENERIC_MODEL_NAME='qwen-flash'
+export LLM_CODER_MODEL_NAME='qwen3-coder-flash'
 
 # Start all services
 docker-compose up -d
@@ -177,27 +179,29 @@ cd apps/web
 pnpm dev
 ```
 
-### Access Points
+### 🌐 Access Points
 
-- **Web Application**: http://localhost:3000
-- **API Documentation**: http://localhost:8080/docs
-- **Redis Insight**: http://localhost:5540 (development profile)
-- **MCP Inspector**: http://localhost:6274 (development profile)
+| Service | URL | Description |
+|---------|-----|-------------|
+| **Web Application** | http://localhost:3000 | Main user interface |
+| **API Documentation** | http://localhost:8080/docs | Interactive API docs |
+| **Redis Insight** | http://localhost:5540 | Database visualization *(dev only)* |
+| **MCP Inspector** | http://localhost:6274 | Tool debugging *(dev only)* |
 
 ---
 
 ## 🎮 Usage Examples
 
-### Basic Strategy Request
+### ✅ Basic Strategy Request
 
-```
+```text
 "Create a moving average crossover strategy for AAPL with 20-day and 50-day periods, 
 backtest it for the last 2 years, and show me the performance metrics"
 ```
 
-### Advanced Technical Analysis
+### 🚧 Advanced Technical Analysis *(In Roadmap)*
 
-```
+```text
 "Build an RSI mean reversion strategy for SPY with:
 - RSI oversold at 30, overbought at 70
 - Bollinger Bands for entry confirmation
@@ -205,9 +209,9 @@ backtest it for the last 2 years, and show me the performance metrics"
 - Backtest on 5-minute data for the last 3 months"
 ```
 
-### Multi-Asset Strategy
+### 🚧 Multi-Asset Strategy *(In Roadmap)*
 
-```
+```text
 "Create a pairs trading strategy between NVDA and AMD using:
 - 60-day rolling correlation
 - Z-score entry/exit signals
@@ -268,28 +272,37 @@ AgentQuant/
 └── types/                   # TypeScript type definitions
 ```
 
-### Available Scripts
+### 🛠️ Available Scripts
 
+#### Monorepo Commands
 ```bash
-# Monorepo commands
 pnpm build          # Build all applications
 pnpm dev            # Start all services in development mode
 pnpm lint           # Run linting across all packages
 pnpm format         # Format code with Prettier
 pnpm test           # Run test suites
-
-# Individual service commands
-cd apps/web && pnpm dev                    # Start web app
-cd apps/mcp-server && uv run uvicorn ...   # Start tooling service
-cd apps/agent && uv run nat serve ...      # Start AI agent
 ```
 
-### Adding New Features
+#### Individual Service Commands
+```bash
+# Web Application
+cd apps/web && pnpm dev
 
-1. **New Technical Indicators**: Add to `apps/mcp-server/mcp_server/`
-2. **UI Components**: Create in `apps/web/components/`
-3. **Agent Tools**: Extend `apps/agent/src/agent/`
-4. **API Endpoints**: Add to `apps/mcp-server/mcp_server/`
+# Tooling Service
+cd apps/mcp-server && uv run uvicorn mcp_server.main:api --reload --port 8080
+
+# AI Agent
+cd apps/agent && uv run nat serve --config_file configs/config.yaml
+```
+
+### 🔧 Adding New Features
+
+| Feature Type | Location | Description |
+|--------------|----------|-------------|
+| **Technical Indicators** | `apps/mcp-server/mcp_server/` | Add new trading indicators |
+| **UI Components** | `apps/web/components/` | Create React components |
+| **Agent Tools** | `apps/agent/src/agent/` | Extend AI capabilities |
+| **API Endpoints** | `apps/mcp-server/mcp_server/` | Add new API routes |
 
 ---
 
@@ -311,8 +324,10 @@ kubectl apply -f deploy/k8s/
 ```
 
 #### Production Environments
-- **Local**: Docker Compose for development and testing
-- **Kubernetes**: Scalable deployment for production workloads
+| Environment | Use Case | Description |
+|-------------|----------|-------------|
+| **Local** | Development & Testing | Docker Compose for local development |
+| **Kubernetes** | Production | Scalable deployment for production workloads |
 
 ### Environment Configuration
 
