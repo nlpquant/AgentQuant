@@ -195,6 +195,13 @@ uv run nat serve --config_file configs/config.yaml
 # Start Web App (in new terminal)
 cd apps/web
 pnpm dev
+
+# Optional: Start development tools (in new terminal)
+cd deploy
+# Start Redis Insight for database visualization
+docker-compose up redis-insight -d
+# Start MCP Inspector for tool debugging
+docker-compose up mcp-inspector -d
 ```
 
 ### 🌐 Access Points
@@ -206,6 +213,8 @@ pnpm dev
 | **Tooling Service** | http://localhost:8080/docs | MCP Server API documentation        |
 | **Redis Insight**   | http://localhost:5540      | Database visualization _(dev only)_ |
 | **MCP Inspector**   | http://localhost:6274      | Tool debugging _(dev only)_         |
+
+> 💡 **Development Tools**: Redis Insight and MCP Inspector are available via Docker Compose for debugging and monitoring during development.
 
 ---
 
@@ -287,8 +296,8 @@ AgentQuant/
 │   ├── agent/               # AI agent service (Python)
 │   └── mcp-server/          # Tooling service (FastAPI)
 ├── deploy/                  # Docker and Kubernetes configurations
-├── components/              # Shared UI components
-└── types/                   # TypeScript type definitions
+├── assets/                  # Static assets (images, demos)
+└── LICENSE                  # AGPL-3.0 license
 ```
 
 ### 🛠️ Available Scripts
@@ -329,29 +338,12 @@ cd apps/agent && uv run nat serve --config_file configs/config.yaml
 
 ## 🚀 Deployment
 
-### Production Deployment
-
-The platform supports multiple deployment strategies:
-
-#### Docker Compose (Single Server)
-
-```bash
-cd deploy
-docker-compose -f docker-compose.prod.yml up -d
-```
-
-#### Kubernetes (Scalable)
-
-```bash
-kubectl apply -f deploy/k8s/
-```
-
 #### Production Environments
 
-| Environment    | Use Case              | Description                                  |
-| -------------- | --------------------- | -------------------------------------------- |
-| **Local**      | Development & Testing | Docker Compose for local development         |
-| **Kubernetes** | Production            | Scalable deployment for production workloads |
+| Environment        | Use Case                 | Description                                |
+| ------------------ | ------------------------ | ------------------------------------------ |
+| **Docker Compose** | Development & Production | Single-server deployment for all use cases |
+| **Kind Cluster**   | Development              | Local Kubernetes cluster for testing       |
 
 ### Environment Configuration
 
@@ -381,12 +373,13 @@ kubectl apply -f deploy/k8s/
 
 ### MCP Tools
 
-| Tool            | Description                 |
-| --------------- | --------------------------- |
-| `quick_preview` | Preview strategy parameters |
-| `yh_query_save` | Fetch and cache market data |
-| `code_executor` | Execute backtest code       |
-| `task_manager`  | Manage strategy tasks       |
+| Tool             | Description                    |
+| ---------------- | ------------------------------ |
+| `task_register`  | Register new strategy tasks    |
+| `quick_preview`  | Preview strategy parameters    |
+| `yh_query_save`  | Fetch and cache market data    |
+| `code_generator` | Generate trading strategy code |
+| `code_executor`  | Execute backtest code          |
 
 ---
 
