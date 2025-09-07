@@ -212,7 +212,7 @@ backtest it for the last 2 years, and show me the performance metrics"
 ### 🚧 Multi-Asset Strategy *(In Roadmap)*
 
 ```text
-"Create a pairs trading strategy between NVDA and AMD using:
+"Create a pairs trading strategy between INTC and AMD using:
 - 60-day rolling correlation
 - Z-score entry/exit signals
 - Risk management with position sizing
