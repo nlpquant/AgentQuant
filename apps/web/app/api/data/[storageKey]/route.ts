@@ -9,7 +9,8 @@ export async function GET(
   console.log('storageKey:', storageKey);
 
   try {
-    const response = await fetch(`http://localhost:8080/data/${storageKey}`);
+    const mcpUrl = process.env.MCP_SERVER_URL || 'http://localhost:8080';
+    const response = await fetch(`${mcpUrl}/data/${storageKey}`);
 
     if (!response.ok) {
       return NextResponse.json(

@@ -77,7 +77,8 @@ export async function GET(
   console.log('Fetching result for taskId:', taskId);
 
   try {
-    const response = await fetch(`http://localhost:8080/result/${taskId}`);
+    const mcpUrl = process.env.MCP_SERVER_URL || 'http://localhost:8080';
+    const response = await fetch(`${mcpUrl}/result/${taskId}`);
 
     if (!response.ok) {
       return NextResponse.json(

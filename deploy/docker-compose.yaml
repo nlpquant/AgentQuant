@@ -1,4 +1,27 @@
 services:
+  web:
+    build:
+      context: ..
+      dockerfile: apps/web/Dockerfile
+    container_name: agentquant-web
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    networks:
+      - agentquant-network
+    environment:
+      NODE_ENV: production
+      MCP_SERVER_URL: http://mcp-server:8080
+      AGENT_SERVER_URL: http://agent:8000
+    healthcheck:
+      test: ["CMD", "curl", "-fs", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    depends_on:
+      agent:
+        condition: service_healthy
+
   agent:
     build:
       context: ../apps

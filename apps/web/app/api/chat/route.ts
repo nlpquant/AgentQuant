@@ -121,7 +121,8 @@ export async function POST(req: Request) {
   try {
     const { messages }: { messages: UIMessage[] } = await req.json();
 
-    const response = await fetch('http://localhost:8000/v1/chat/completions', {
+    const agentUrl = process.env.AGENT_SERVER_URL || 'http://localhost:8000';
+    const response = await fetch(`${agentUrl}/v1/chat/completions`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
