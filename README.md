@@ -4,7 +4,7 @@
 
 **AI-Powered Quantitative Trading Platform**
 
-*Transform natural language into sophisticated trading strategies with real-time backtesting and interactive visualization*
+_Transform natural language into sophisticated trading strategies with real-time backtesting and interactive visualization_
 
 [![Join Waitlist](https://img.shields.io/badge/Join-Waitlist-orange?style=for-the-badge&logo=maildotru)](https://nlpquant.ai/)
 
@@ -51,32 +51,32 @@ graph TB
         UI[Web App<br/>Next.js + React]
         UI --> |Chat Interface| API[API Routes]
     end
-    
+
     subgraph "AI Layer"
         AGENT[AI Agent<br/>LangChain + NAT]
         AGENT --> |Tool Calls| MCP[MCP Server]
     end
-    
+
     subgraph "Data & Execution Layer"
         MCP --> |Market Data| REDIS[(Redis Cache)]
         MCP --> |Code Execution| K8S[Kubernetes<br/>Execution Sandbox]
         K8S --> |Results| REDIS
     end
-    
+
     subgraph "External Services"
         MARKET[Market Data<br/>Yahoo Finance]
         LLM[LLM Services<br/>OpenAI/Qwen]
     end
-    
+
     API --> AGENT
     AGENT --> LLM
     MCP --> MARKET
-    
+
     classDef frontend fill:#667eea,stroke:#764ba2,stroke-width:3px,color:#fff
     classDef ai fill:#f093fb,stroke:#f5576c,stroke-width:3px,color:#fff
     classDef data fill:#4facfe,stroke:#00f2fe,stroke-width:3px,color:#fff
     classDef external fill:#43e97b,stroke:#38f9d7,stroke-width:3px,color:#fff
-    
+
     class UI,API frontend
     class AGENT,MCP ai
     class REDIS,K8S data
@@ -85,15 +85,15 @@ graph TB
 
 ### Technology Stack
 
-| Component | Technology | Purpose |
-|-----------|------------|---------|
-| **Frontend** | Next.js 15, React 19, TypeScript | Modern web interface with streaming UI |
-| **AI Agent** | LangChain, NVIDIA NAT, Python 3.12 | Natural language processing and tool orchestration |
-| **Tooling Service** | FastAPI, MCP Protocol | Unified API for market data and execution |
-| **Execution** | Kubernetes, Docker | Isolated backtesting environments |
-| **Data Store** | Redis 7 | High-performance caching and state management |
-| **Charts** | Lightweight Charts, Recharts | Professional financial visualizations |
-| **Styling** | Tailwind CSS, Radix UI | Modern, accessible design system |
+| Component           | Technology                         | Purpose                                            |
+| ------------------- | ---------------------------------- | -------------------------------------------------- |
+| **Frontend**        | Next.js 15, React 19, TypeScript   | Modern web interface with streaming UI             |
+| **AI Agent**        | LangChain, NVIDIA NAT, Python 3.12 | Natural language processing and tool orchestration |
+| **Tooling Service** | FastAPI, MCP Protocol              | Unified API for market data and execution          |
+| **Execution**       | Kubernetes, Docker                 | Isolated backtesting environments                  |
+| **Data Store**      | Redis 7                            | High-performance caching and state management      |
+| **Charts**          | Lightweight Charts, Recharts       | Professional financial visualizations              |
+| **Styling**         | Tailwind CSS, Radix UI             | Modern, accessible design system                   |
 
 ### End-to-End Sequence (Simplified)
 
@@ -115,7 +115,7 @@ sequenceDiagram
   Runner->>Store: Read/write data
   Tools-->>Agent: Return metrics and outputs
   Agent-->>Web: Summarize results and visuals
-  
+
   Note over User,Web: Frontend Layer
   Note over Agent,Tools: AI & Service Layer
   Note over Store,Runner: Data & Execution Layer
@@ -127,13 +127,14 @@ sequenceDiagram
 
 ### 📋 Prerequisites
 
-| Requirement | Version | Notes |
-|-------------|---------|-------|
-| **Node.js** | 18+ | With `pnpm` package manager |
-| **Python** | 3.12+ | With `uv` package manager |
-| **Docker** | Latest | & `Docker Compose` |
-| **Redis** | 7+ | *(Included in Docker setup)* |
-| **OpenAI API Key** | - | Or compatible LLM service |
+| Requirement      | Version | Notes                             |
+| ---------------- | ------- | --------------------------------- |
+| **Node.js**      | 18+     | With `pnpm` package manager       |
+| **Python**       | 3.12+   | With `uv` package manager         |
+| **Docker**       | Latest  | & `Docker Compose`                |
+| **Kubernetes**   | Latest  | For code execution sandbox        |
+| **Redis**        | 7+      | _(Included in Docker setup)_      |
+| **LLM API Keys** | -       | For both generic and coder models |
 
 ### Option 1: Docker Compose (Recommended)
 
@@ -144,9 +145,12 @@ cd AgentQuant
 
 # Set up environment variables
 cd deploy
-export OPENAI_API_KEY='your-api-key-here'
-export LLM_GENERIC_MODEL_NAME='qwen-flash'
-export LLM_CODER_MODEL_NAME='qwen3-coder-flash'
+export LLM_GENERIC_MODEL_NAME='qwen3-plus'
+export LLM_CODER_MODEL_NAME='qwen3-coder-plus'
+export LLM_GENERIC_MODEL_API_ENDPOINT='your-api-endpoint'
+export LLM_CODER_MODEL_API_ENDPOINT='your-api-endpoint'
+export LLM_GENERIC_MODEL_API_KEY='your-api-key'
+export LLM_CODER_MODEL_API_KEY='your-api-key'
 
 # Start all services
 docker-compose up -d
@@ -164,7 +168,15 @@ pnpm install
 # Start Redis
 docker run --rm -p 6379:6379 redis:7-alpine
 
-# Start Tooling Service
+# Start Kubernetes cluster (required for code execution)
+cd deploy
+docker-compose up kind -d
+# Wait for cluster to be ready
+docker-compose exec kind sh -c "kubectl wait --for=condition=Ready nodes --all --timeout=300s"
+# Verify cluster is running
+docker-compose exec kind sh -c "kubectl get nodes"
+
+# Start Tooling Service (in new terminal)
 cd apps/mcp-server
 uv venv --python 3.12 --seed .venv
 source .venv/bin/activate
@@ -176,7 +188,8 @@ cd apps/agent
 uv venv --python 3.12 --seed .venv
 source .venv/bin/activate
 uv sync
-export OPENAI_API_KEY='your-api-key-here'
+export LLM_GENERIC_MODEL_API_KEY='your-api-key-here'
+export LLM_CODER_MODEL_API_KEY='your-api-key-here'
 uv run nat serve --config_file configs/config.yaml
 
 # Start Web App (in new terminal)
@@ -186,12 +199,13 @@ pnpm dev
 
 ### 🌐 Access Points
 
-| Service | URL | Description |
-|---------|-----|-------------|
-| **Web Application** | http://localhost:3000 | Main user interface |
-| **API Documentation** | http://localhost:8080/docs | Interactive API docs |
-| **Redis Insight** | http://localhost:5540 | Database visualization *(dev only)* |
-| **MCP Inspector** | http://localhost:6274 | Tool debugging *(dev only)* |
+| Service             | URL                        | Description                         |
+| ------------------- | -------------------------- | ----------------------------------- |
+| **Web Application** | http://localhost:3000      | Main user interface                 |
+| **Agent API**       | http://localhost:8000/docs | AI Agent API documentation          |
+| **Tooling Service** | http://localhost:8080/docs | MCP Server API documentation        |
+| **Redis Insight**   | http://localhost:5540      | Database visualization _(dev only)_ |
+| **MCP Inspector**   | http://localhost:6274      | Tool debugging _(dev only)_         |
 
 ---
 
@@ -200,11 +214,11 @@ pnpm dev
 ### ✅ Basic Strategy Request
 
 ```text
-"Create a moving average crossover strategy for AAPL with 20-day and 50-day periods, 
+"Create a moving average crossover strategy for AAPL with 20-day and 50-day periods,
 backtest it for the last 2 years, and show me the performance metrics"
 ```
 
-### 🚧 Advanced Technical Analysis *(In Roadmap)*
+### 🚧 Advanced Technical Analysis _(In Roadmap)_
 
 ```text
 "Build an RSI mean reversion strategy for SPY with:
@@ -214,7 +228,7 @@ backtest it for the last 2 years, and show me the performance metrics"
 - Backtest on 5-minute data for the last 3 months"
 ```
 
-### 🚧 Multi-Asset Strategy *(In Roadmap)*
+### 🚧 Multi-Asset Strategy _(In Roadmap)_
 
 ```text
 "Create a pairs trading strategy between INTC and AMD using:
@@ -280,6 +294,7 @@ AgentQuant/
 ### 🛠️ Available Scripts
 
 #### Monorepo Commands
+
 ```bash
 pnpm build          # Build all applications
 pnpm dev            # Start all services in development mode
@@ -289,6 +304,7 @@ pnpm test           # Run test suites
 ```
 
 #### Individual Service Commands
+
 ```bash
 # Web Application
 cd apps/web && pnpm dev
@@ -302,12 +318,12 @@ cd apps/agent && uv run nat serve --config_file configs/config.yaml
 
 ### 🔧 Adding New Features
 
-| Feature Type | Location | Description |
-|--------------|----------|-------------|
+| Feature Type             | Location                      | Description                |
+| ------------------------ | ----------------------------- | -------------------------- |
 | **Technical Indicators** | `apps/mcp-server/mcp_server/` | Add new trading indicators |
-| **UI Components** | `apps/web/components/` | Create React components |
-| **Agent Tools** | `apps/agent/src/agent/` | Extend AI capabilities |
-| **API Endpoints** | `apps/mcp-server/mcp_server/` | Add new API routes |
+| **UI Components**        | `apps/web/components/`        | Create React components    |
+| **Agent Tools**          | `apps/agent/src/agent/`       | Extend AI capabilities     |
+| **API Endpoints**        | `apps/mcp-server/mcp_server/` | Add new API routes         |
 
 ---
 
@@ -318,31 +334,37 @@ cd apps/agent && uv run nat serve --config_file configs/config.yaml
 The platform supports multiple deployment strategies:
 
 #### Docker Compose (Single Server)
+
 ```bash
 cd deploy
 docker-compose -f docker-compose.prod.yml up -d
 ```
 
 #### Kubernetes (Scalable)
+
 ```bash
 kubectl apply -f deploy/k8s/
 ```
 
 #### Production Environments
-| Environment | Use Case | Description |
-|-------------|----------|-------------|
-| **Local** | Development & Testing | Docker Compose for local development |
-| **Kubernetes** | Production | Scalable deployment for production workloads |
+
+| Environment    | Use Case              | Description                                  |
+| -------------- | --------------------- | -------------------------------------------- |
+| **Local**      | Development & Testing | Docker Compose for local development         |
+| **Kubernetes** | Production            | Scalable deployment for production workloads |
 
 ### Environment Configuration
 
-| Variable | Description | Required |
-|----------|-------------|----------|
-| `OPENAI_API_KEY` | OpenAI API key for LLM access | ✅ |
-| `LLM_GENERIC_MODEL_NAME` | Model for general tasks | ✅ |
-| `LLM_CODER_MODEL_NAME` | Model for code generation | ✅ |
-| `REDIS_URL` | Redis connection string | ✅ |
-| `K8S_CONFIG_FILE` | Kubernetes config path | Optional |
+| Variable                         | Description                    | Required |
+| -------------------------------- | ------------------------------ | -------- |
+| `LLM_GENERIC_MODEL_NAME`         | Model name for general tasks   | ✅       |
+| `LLM_CODER_MODEL_NAME`           | Model name for code generation | ✅       |
+| `LLM_GENERIC_MODEL_API_ENDPOINT` | API endpoint for generic model | ✅       |
+| `LLM_CODER_MODEL_API_ENDPOINT`   | API endpoint for coder model   | ✅       |
+| `LLM_GENERIC_MODEL_API_KEY`      | API key for generic model      | ✅       |
+| `LLM_CODER_MODEL_API_KEY`        | API key for coder model        | ✅       |
+| `REDIS_URL`                      | Redis connection string        | ✅       |
+| `K8S_CONFIG_FILE`                | Kubernetes config path         | Optional |
 
 ---
 
@@ -350,21 +372,21 @@ kubectl apply -f deploy/k8s/
 
 ### Core Endpoints
 
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/chat` | POST | Submit strategy requests |
-| `/api/data/[storageKey]` | GET | Retrieve market data |
-| `/api/result/[taskId]` | GET | Get backtest results |
-| `/health` | GET | Service health check |
+| Endpoint                 | Method | Description              |
+| ------------------------ | ------ | ------------------------ |
+| `/api/chat`              | POST   | Submit strategy requests |
+| `/api/data/[storageKey]` | GET    | Retrieve market data     |
+| `/api/result/[taskId]`   | GET    | Get backtest results     |
+| `/health`                | GET    | Service health check     |
 
 ### MCP Tools
 
-| Tool | Description |
-|------|-------------|
+| Tool            | Description                 |
+| --------------- | --------------------------- |
 | `quick_preview` | Preview strategy parameters |
 | `yh_query_save` | Fetch and cache market data |
-| `code_executor` | Execute backtest code |
-| `task_manager` | Manage strategy tasks |
+| `code_executor` | Execute backtest code       |
+| `task_manager`  | Manage strategy tasks       |
 
 ---
 

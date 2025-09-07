@@ -73,16 +73,16 @@ BACKTRADER CODE REQUIREMENTS:
 
 EXPECTED JSON OUTPUT FORMAT:
 {{
-  "init_code": (
+  "init_code": [
     "# Backtrader __init__ method code\\n"
     "self.sma5 = bt.indicators.SimpleMovingAverage(self.data.close, period=5)\\n"
     "self.sma20 = bt.indicators.SimpleMovingAverage(self.data.close, period=20)"
-  ),
-  "next_code": (
+  ],
+  "next_code": [
     "# Backtrader next() method code\\n"
     "if not self.position:\\n    if self.sma5 > self.sma20:\\n        self.buy()\\n"
     "else:\\n    if self.sma5 < self.sma20:\\n        self.sell()"
-  ),
+  ],
   "logic_summary": {{
     "entry_conditions": [
       "<human readable entry condition>"

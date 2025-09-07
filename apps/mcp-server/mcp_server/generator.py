@@ -92,10 +92,17 @@ class GeneratedStrategy(bt.Strategy):
 strategy_template = Template(STRATEGY_TEMPLATE.strip())
 
 
-def generate_strategy_code(init_code: str, next_code: str) -> str:
+def generate_strategy_code(init_code: str | list, next_code: str | list) -> str:
+    if type(init_code) == str:
+        return str(
+            strategy_template.render(
+                init_code=init_code.strip(), next_code=next_code.strip()
+            )
+        )
     return str(
         strategy_template.render(
-            init_code=init_code.strip(), next_code=next_code.strip()
+            init_code="\n".join([code.strip() for code in init_code]),
+            next_code="\n".join([code.strip() for code in next_code]),
         )
     )
 
@@ -350,6 +357,7 @@ if __name__ == '__main__':
 
 
 execution_with_data_template = Template(EXECUTION_WITH_DATA_TEMPLATE.strip())
+
 
 def generate_execution_with_data_code(strategy_code, initial_cash):
     return execution_with_data_template.render(
