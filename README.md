@@ -53,7 +53,7 @@ graph TB
     end
 
     subgraph "AI Layer"
-        AGENT[AI Agent<br/>LangChain + NAT]
+        AGENT[AI Agent<br/>LangChain + NAT + Qwen]
         AGENT --> |Tool Calls| MCP[MCP Server]
     end
 
@@ -409,6 +409,7 @@ This project is licensed under the GNU Affero General Public License v3.0 (AGPL-
 
 - **LangChain** for AI orchestration framework
 - **NVIDIA NAT** for agent infrastructure
+- **Alibaba Qwen** for performant Large Language Model
 - **FastAPI** for high-performance API framework
 - **Next.js** for modern React framework
 - **Lightweight Charts** for financial visualizations
