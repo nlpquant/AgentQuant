@@ -6,6 +6,8 @@
 
 *Transform natural language into sophisticated trading strategies with real-time backtesting and interactive visualization*
 
+[![Join Waitlist](https://img.shields.io/badge/Join-Waitlist-orange?style=for-the-badge&logo=mailchimp)](https://nlpquant.ai/)
+
 [![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL--3.0-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 [![Node.js](https://img.shields.io/badge/Node.js-18+-green.svg)](https://nodejs.org/)
 [![Python](https://img.shields.io/badge/Python-3.12+-blue.svg)](https://python.org/)
@@ -19,6 +21,8 @@
 ## 🎯 Overview
 
 AgentQuant is a cutting-edge **AI-assisted quantitative trading platform** that revolutionizes how traders and developers approach strategy development. By combining advanced language models with sophisticated tooling infrastructure, it transforms natural language trading ideas into executable, backtestable strategies with comprehensive performance analytics.
+
+> 🚀 **Ready to try AgentQuant?** [Join our waitlist](https://nlpquant.ai/) for early access to the platform!
 
 ### ✨ Key Features
 
@@ -120,7 +124,7 @@ sequenceDiagram
 
 - **Node.js** 18+ with `pnpm`
 - **Python** 3.12+ with `uv`
-- **Docker** & **Docker Compose`
+- **Docker** & `Docker Compose`
 - **Redis** 7+ (included in Docker setup)
 - **OpenAI API Key** (or compatible LLM service)
 
@@ -128,7 +132,7 @@ sequenceDiagram
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-org/AgentQuant.git
+git clone https://github.com/nlpquant/AgentQuant.git
 cd AgentQuant
 
 # Set up environment variables
@@ -379,9 +383,10 @@ This project is licensed under the GNU Affero General Public License v3.0 (AGPL-
 
 ## 📞 Support
 
-- 📖 **Documentation**: [Wiki](https://github.com/your-org/AgentQuant/wiki)
-- 🐛 **Bug Reports**: [Issues](https://github.com/your-org/AgentQuant/issues)
-- 💬 **Discussions**: [GitHub Discussions](https://github.com/your-org/AgentQuant/discussions)
+- 🌐 **Official Website**: [nlpquant.ai](https://nlpquant.ai/) - Join our waitlist for early access
+- 📖 **Documentation**: [Wiki](https://github.com/nlpquant/AgentQuant/wiki)
+- 🐛 **Bug Reports**: [Issues](https://github.com/nlpquant/AgentQuant/issues)
+- 💬 **Discussions**: [GitHub Discussions](https://github.com/nlpquant/AgentQuant/discussions)
 - 📧 **Email**: support@agentquant.com
 
 ---
@@ -390,6 +395,6 @@ This project is licensed under the GNU Affero General Public License v3.0 (AGPL-
 
 **Built with ❤️ by the AgentQuant Team**
 
-[Website](https://agentquant.com) • [Documentation](https://docs.agentquant.com) • [Community](https://discord.gg/agentquant)
+[Website](https://nlpquant.ai/) • [GitHub](https://github.com/nlpquant/AgentQuant) • [Documentation](https://github.com/nlpquant/AgentQuant/wiki)
 
 </div>
