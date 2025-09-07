@@ -23,6 +23,11 @@ _Transform natural language into sophisticated trading strategies with real-time
 AgentQuant is a cutting-edge **AI-assisted quantitative trading platform** that revolutionizes how traders and developers approach strategy development. By combining advanced language models with sophisticated tooling infrastructure, it transforms natural language trading ideas into executable, backtestable strategies with comprehensive performance analytics.
 
 <div align="center">
+  <img src="assets/home.png" alt="AgentQuant Platform Interface" width="800" style="border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+  <p><em>AgentQuant's intuitive interface - "The Flight Simulator for Trading Strategies"</em></p>
+</div>
+
+<div align="center">
   <img src="assets/demo.gif" alt="AgentQuant Demo" width="800" style="border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
   <p><em>See AgentQuant in action - from natural language to trading results in seconds!</em></p>
 </div>
