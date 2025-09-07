@@ -62,6 +62,16 @@ graph TB
     API --> AGENT
     AGENT --> LLM
     MCP --> MARKET
+    
+    classDef frontend fill:#667eea,stroke:#764ba2,stroke-width:3px,color:#fff
+    classDef ai fill:#f093fb,stroke:#f5576c,stroke-width:3px,color:#fff
+    classDef data fill:#4facfe,stroke:#00f2fe,stroke-width:3px,color:#fff
+    classDef external fill:#43e97b,stroke:#38f9d7,stroke-width:3px,color:#fff
+    
+    class UI,API frontend
+    class AGENT,MCP ai
+    class REDIS,K8S data
+    class MARKET,LLM external
 ```
 
 ### Technology Stack
@@ -96,6 +106,10 @@ sequenceDiagram
   Runner->>Store: Read/write data
   Tools-->>Agent: Return metrics and outputs
   Agent-->>Web: Summarize results and visuals
+  
+  Note over User,Web: Frontend Layer
+  Note over Agent,Tools: AI & Service Layer
+  Note over Store,Runner: Data & Execution Layer
 ```
 
 ---
